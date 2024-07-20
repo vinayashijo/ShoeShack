@@ -1,0 +1,495 @@
+<%- include ('../partials/userheader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+  .main-div {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+  }
+  .profile-container {
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
+      rgba(0, 0, 0, 0.23) 0px 6px 6px;
+  }
+  section {
+    width: 80%;
+  }
+  .edit-image {
+    text-decoration: none;
+  }
+  input {
+    border-radius: 0 !important;
+  }
+  input.form-control,
+  textarea {
+    background-color: #fff;
+  }
+  input:disabled {
+    border: none;
+    background-color: #fff;
+    font-weight: bold;
+  }
+  .fs--1 a {
+    color: #7a7a7a;
+    padding: 10px;
+  }
+  .fs--1 a.active {
+    background-color: #7a7a7a;
+    color: #fff;
+  }
+  .fs--1 a:hover {
+    background-color: #7a7a7a;
+    color: white;
+  }
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+  }
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+  }
+  .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+  }
+  .table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+  }
+  .star-rating {
+    display: flex;
+  }
+  .star {
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 1.5rem;
+    color: #343a40;
+    transition: color 0.3s;
+  }
+  input[type="checkbox"] {
+    display: none;
+  }
+  input[type="checkbox"]:checked + label {
+    color: gold;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #007bff;
+  }
+  .modal-title {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #007bff;
+  }
+  .modal-body {
+    padding: 15px 0;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 15px;
+    border-top: 2px solid #007bff;
+  }
+  .btn-secondary,
+  .btn-primary {
+    padding: 10px 20px;
+    margin-left: 10px;
+  }
+  .comment-label {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #343a40;
+  }
+  #comment {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+  }
+  .payment-details {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+  }
+  .payment-details h5 {
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  .payment-details p {
+    margin: 5px 0;
+  }
+  .retry-payment-btn {
+    margin-top: 10px;
+  }
+  .address-summary {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+  }
+  .address-summary h5 {
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  .address-summary p {
+    margin: 5px 0;
+  }
+</style>
+
+
+<div class="main-div">
+  <section class="font-1">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="card-title">Order Summary</h5>
+            <div>Order Id: <%= order.trackingId %></div>
+            <div>Date: <%= order.orderDate %></div>
+            <div>Status: <%= order.orderStatus %></div>
+            <div>Payment Method: <%= order.paymentMethod %></div>
+            <% if(order.paymentStatus == 'Failed' ) { %>
+            <div>
+              Payment Status:
+              <a class="text-danger"> <%= order.paymentStatus %></a>
+            </div>
+            <% } else { %>
+            <div>
+              Payment Status:
+              <a class="text-success"> <%= order.paymentStatus %></a>
+            </div>
+            <% } %>
+            <div>Total Amount: ₹ <%= order.totalprice %></div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Product</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <% if(order.status === 'Delivered') { %>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <% } %>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% var i =-1 %> <% for (let product of products) { %> <% var
+                  total = product.regularPrice * product.stock %> <% i= i+1 %>
+                  <tr>
+                    <td>
+                      <a href="/productdetails/<%= product._id %>">
+                        <img
+                          width="100"
+                          src="/public/photos/<%= product.productImage[0] %>"
+                          alt=""
+                        />
+                      </a>
+                    </td>
+                    <td><%= product.productName %></td>
+                    <td><%= product.category.name %></td>
+                    <td>₹<%= product.regularPrice %></td>
+                    <!-- <td><%= product.stock %></td> -->
+                    <td><%= order.items[i].quantity %></td>
+                    <td>
+                      ₹<%= product.regularPrice * order.items[i].quantity %>
+                    </td>
+                    <% if(order.status === 'Delivered') { %>
+                    <td>
+                      <div class="star-rating">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                        <input
+                          type="checkbox"
+                          id="star<%= i %>_<%= product._id %>"
+                          name="rating_<%= product._id %>"
+                          value="<%= i %>"
+                        />
+                        <label
+                          for="star<%= i %>_<%= product._id %>"
+                          class="star"
+                          >&#9733;</label
+                        >
+                        <% } %>
+                      </div>
+                    </td>
+                    <td>
+                      <a
+                        class="btn btn-secondary create-review-btn"
+                        data-toggle="modal"
+                        data-target="#createReviewModal"
+                        data-product-id="<%= product._id  %>"
+                        onclick="setModalProductId('<%= product._id %>');submitRating('<%= product._id %>')"
+                      >
+                        Review
+                      </a>
+                    </td>
+                    <% } %>
+                  </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+            <div class="pt-2 d-flex justify-content-between">
+              <div>
+                <a class="btn btn-primary" href="/getprofile#orders"
+                  >Back to orders</a
+                >
+              </div>
+              <% if(order.paymentStatus == 'Failed' ) { %>
+              <div>
+                <a
+                  class="btn btn-danger"
+                  id="retryPay"
+                  data-retryorder="<%= JSON.stringify(order) %>"
+                  >Retry Payment</a
+                >
+              </div>
+              <% } else {  %>
+                <div>           
+                    <button id="viewInvoice" data-order="<%= JSON.stringify(order) %>"  class="btn btn-primary">Invoice</button>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="address-summary mt-4 mt-md-0">
+          <h5><u>Address Details</u></h5>
+          <p>Name: <%= order.billingdetails.name %></p>
+          <p>Mobile: <%= order.billingdetails.mobile %></p>
+          <p>Pin Code: <%= order.billingdetails.pincode %></p>
+          <p>House Name: <%= order.billingdetails.houseName %></p>
+          <p>city Or Town: <%= order.billingdetails.cityOrTown %></p>
+          <p>District: <%= order.billingdetails.district %></p>
+
+          <p>State: <%= order.billingdetails.state %></p>
+          <p>Country: <%= order.billingdetails.country %></p>
+        </div>
+        <div class="payment-details mt-4">
+          <h5><u>Payment Details</u></h5>
+          <p>
+            Total Amount: ₹<%= (order.totalprice + order.discountAmount).toFixed(2) %>
+          </p>
+          <p>Discount: ₹<%= order.discountAmount.toFixed(2) %></p>
+          <p>Final Amount: ₹<%= order.totalprice.toFixed(2) %></p>
+          <p>Payment Method: <%= order.paymentMethod %></p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {    
+    document.getElementById('viewInvoice').addEventListener('click', function() {
+        const order = JSON.parse(this.getAttribute('data-order'));   //check in the button there is an attribute :- data-order which has data i linked to 
+          console.log("Order Data:", order); 
+
+        const { jsPDF } = window.jspdf;
+        // Initialize jsPDF correctly
+        const doc = new jsPDF();
+        let yPos = 20;
+        // Title
+        doc.setFontSize(20);
+        doc.text('INVOICE', 110, yPos, null, null, 'center');
+        yPos += 5;
+        doc.setFontSize(16);
+        doc.text('Shoe Shack',10,yPos);
+        yPos +=5;
+        doc.setFontSize(12);
+        doc.text('32ARWPV6357N1ZN',10,yPos);
+        yPos +=5;
+        doc.text('Kochi',10,yPos);
+        yPos+=15
+        // Order details
+        doc.setFontSize(12);
+        if (order) {
+            doc.text('Order ID: ' + order.trackingId , 10, yPos);
+            // yPos += 5;
+            doc.text('Date: ' + new Date().toLocaleDateString(), 170, yPos);
+          
+
+               // Shipping address
+            yPos += 15;
+            doc.setFontSize(16);   
+            doc.text('Shipping Address:', 10, yPos);
+            yPos += 10;
+            doc.setFontSize(12); 
+
+            if (order.billingdetails) {
+                const name = order.billingdetails.name ;
+                doc.text(name, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.houseName, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.cityOrTown, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.district + ', ' + order.billingdetails.state + order.billingdetails.pincode, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.country, 10, yPos);
+                yPos += 10;
+            }
+            // Products table
+            if (order.items && order.items.length > 0) {
+                const bodyData = order.items.map(item =>
+                 { return [item.product.productName,  item.product.brand, item.product?.category?.name, item.price, item.quantity,(item.price * item.quantity)] });
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Product','Brand', 'Category', 'Price','Quantity', 'SubTotal']],
+                    body: bodyData,
+                    theme: 'grid',
+                    styles: { halign: 'center' },
+                });
+
+                yPos = doc.previousAutoTable.finalY + 10;
+            }
+            // Total price and discount
+            yPos += 10;
+            // Payment details
+            doc.text('SubTotal:           ' + (order.totalprice),150, yPos);
+            yPos += 5;
+
+            doc.text('GST:              ' + (order.totalprice*.05).toFixed(2), 150, yPos);
+            yPos += 5;
+
+            doc.text('Coupon Discount: ' + (order.discountAmount || '0.00'), 150, yPos);
+            yPos += 5;
+
+            doc.text('Delivery Charges: ' +  '0.00', 150, yPos);
+            yPos += 5;
+
+            doc.text('Extra Discount:   ' + (-(order.totalprice*.05).toFixed(2)  || '0.00') , 150, yPos);
+            yPos += 10;
+
+            doc.text('Total : ' + (order.totalprice || '0.00'), 150, yPos);
+            yPos += 5;
+        }
+        doc.save('invoice.pdf');
+    });
+  });
+
+  // docloaded finished
+  function submitRating(productId) {
+
+    const rating = document.querySelector(
+      `input[name="rating_${productId}"]:checked`
+    ).value;
+
+    const comment = document.getElementById("comment").value;
+
+    fetch(`/products/${productId}/rate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rating, comment }),
+    }).then((response) => {
+        if (response.ok) {
+          console.log("Rating submitted successfully");
+        } else {
+          console.error("Error:", response.statusText);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
+  function razorpayPayment(order) {
+    const rzp_key = "<%= process.env.RAZORPAY_KEY_ID %>";
+
+    var options = {
+      key: rzp_key,
+      amount: order.totalprice * 100,
+      currency: "INR",
+      name: "Shoe Shack",
+      description: "Shoe Shack Payment System",
+      image: "/public/user/assets/imgs/theme/logo.png",
+      order_id: order.id,
+      handler: function (response) {
+        console.log("Payment successful:", response);
+        window.location = "/confirmorder/1";
+      },
+      notes: {
+        address: "ShoeShack Women's Footwear",
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+
+    var rzp1 = new Razorpay(options);
+    // Handle payment failure
+    rzp1.on("payment.failed", function (response) {
+      console.log("Payment failed:", response.error);
+      // Redirect to payment failed page
+      window.location = "/paymentfailed/0";
+    });
+
+    rzp1.open();
+  }
+
+  document.getElementById("retryPay").addEventListener("click", function () {
+    console.log("hi");
+    const order = JSON.parse(this.getAttribute("data-retryorder"));
+
+    console.log(order);
+
+    if (order) {
+      const paymentMethod = order.paymentMethod;
+      console.log(paymentMethod);
+      console.log("order.paymentStatus", order.paymentStatus);
+      if (paymentMethod === "Razorpay" && order.paymentStatus == "Failed") {
+        console.log("order.paymentStatus :Failed");
+        razorpayPayment(order);
+      }
+    }
+  });
+
+ 
+</script>
+  <%- include ('../partials/userfooter') %>
+
+

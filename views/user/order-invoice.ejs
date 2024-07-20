@@ -1,0 +1,175 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        .header img {
+            width: 150px;
+        }
+        .company-details {
+            text-align: right;
+        }
+        .company-details h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .company-details p {
+            margin: 0;
+        }
+        .invoice-details {
+            margin-top: 20px;
+        }
+        .invoice-details h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .invoice-details p {
+            margin: 5px 0;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .section-title {
+            margin-top: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #000;
+            display: inline-block;
+        }
+        .section-content p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body> -->
+    <%- include('../partials/userheader') %>
+
+    <div class="container">
+        <div class="header">
+            <img src="/path/to/shoeshack-logo.png" alt="ShoeShack Logo">
+            <div class="company-details">
+                <h2>ShoeShack</h2>
+                <p>123 Shoe Street</p>
+                <p>Footwear City, FS 12345</p>
+                <p>Email: info@shoeshack.com</p>
+                <p>Phone: +1 234 567 890</p>
+            </div>
+        </div>
+
+        <div class="invoice-details">
+            <h3>Invoice</h3>
+            <p>Invoice ID: <%= order._id %></p>
+            <p>Order Date: <%= moment(order.orderDate).format('DD-MM-YYYY') %></p>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Brand</th>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.items.forEach(item => { %>
+                        <tr>
+                            <td><%= item.product.id %></td>
+                            <td><%= item.product.brand %></td>
+                            <td><%= item.product.productName %></td>
+                            <td><%= item.product.description %></td>
+                            <td><%= item.quantity %></td>
+                            <td>₹<%= item.price.toFixed(2) %></td>
+                            <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="6">Subtotal</th>
+                        <td>₹<%= order.totalprice.toFixed(2) %></td>
+                    </tr>
+                    <% if (order.discountAmount > 0) { %>
+                        <tr>
+                            <th colspan="6">Discount</th>
+                            <td>-₹<%= order.discountAmount.toFixed(2) %></td>
+                        </tr>
+                    <% } %>
+                    <% if (order.walletUsed > 0) { %>
+                        <tr>
+                            <th colspan="6">Wallet Used</th>
+                            <td>-₹<%= order.walletUsed.toFixed(2) %></td>
+                        </tr>
+                    <% } %>
+                    <tr>
+                        <th colspan="6">Total Amount Payable</th>
+                        <td>₹<%= order.amountPayable.toFixed(2) %></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="section-title">Order Details</div>
+        <div class="section-content">
+            <p>Order Status: <%= order.orderStatus %></p>
+            <p>Payment Method: <%= order.paymentMethod %></p>
+            <p>Payment Status: <%= order.paymentStatus %></p>
+        </div>
+
+        <div class="section-title">Shipping Details</div>
+        <div class="section-content">
+            <p>Name: <%= order.billingdetails.name %></p>
+            <p>Mobile: <%= order.billingdetails.mobile %></p>
+            <p>Pincode: <%= order.billingdetails.pincode %></p>
+            <p>House Name: <%= order.billingdetails.houseName %></p>
+            <p>City/Town: <%= order.billingdetails.cityOrTown %></p>
+            <p>District: <%= order.billingdetails.district %></p>
+            <p>State: <%= order.billingdetails.state %></p>
+            <p>Country: <%= order.billingdetails.country %></p>
+        </div>
+
+        <div class="section-title">Payment Details</div>
+        <div class="section-content">
+            <p>Payment Reference: <%= order.paymentReference %></p>
+            <p>Amount Paid: ₹<%= order.amountPayable.toFixed(2) %></p>
+        </div>
+    </div>
+
+    <%- include('../partials/userfooter') %>

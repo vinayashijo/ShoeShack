@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+
+<!-- Mirrored from wp.alithemes.com/html/ShoeShack/ShoeShack-frontend/page-login-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:26:06 GMT -->
+<head>
+    <meta charset="utf-8">
+    <title>ShoeShack - eCommerce HTML Template</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="public/user/assets/imgs/theme/favicon.svg">
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="public/user/assets/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        .heading_s1 {
+            text-align: center;
+            margin-bottom: 30px; 
+        }
+    </style>
+</head>
+
+<body>
+<div class="container p-4" >
+<div class="row justify-content-center"> 
+  <div class="col-lg-6">
+    <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+        <div class="padding_eight_all bg-white">
+            <div class="heading_s1">
+                <h3 class="mb-30">Create an Account</h3>
+            </div>
+            <form method="post"   action="/usersignup"  id="logform">
+                <div id="otpMessage" style="padding: 10px; margin-bottom: 10px; border-radius: 5px; background-color: #dff0d8; color: #3c763d; display: none;"></div>
+                <div class="form-group">
+                    <input type="text" 
+                    name="username" 
+                    placeholder="Username" 
+                    id="typeNameX"
+                    required/>   
+                </div>
+                <p><span id="error1" style="display: none; color: red;" ></span></p>
+                <div class="form-group mt-2 row">
+                    <div class="col-md-8">
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        class="form-control w-70"
+                        id="typeEmailX"
+                        required
+                      />
+                    </div>
+                    <p><span id="error2" style="display: none; color: red;" ></span></p>
+                    <div class="col-md-4">
+                      <button type="button" class="btn otp"   id="sendOtp" onclick="otpSend()">Send OTP</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2 row ">
+                    <div class="col-6">
+                      <input
+                        type="number"
+                        name="otp"
+                        placeholder="Enter OTP"
+                        class="form-control "
+                        id="otpverify"
+                        required
+                      />
+                    </div>
+        
+                    <div class="col-6">
+                      <button type="button" class="btn btn-primary" id="verify" onclick="otpVerify()">Verify</button>
+                      <span id="timerDisplay" class="ms-2"></span>
+                    </div> 
+                    <span id="otpTimer"></span>
+
+                    <p><span id="otpresult" style="display: none; color: red;" ></span></p>
+
+                    <div class="form-group mt-3">
+                        <input
+                          type="number"
+                          name="mobile"
+                          placeholder="Mobile number"
+                          class="form-control"
+                          id="typeMobileX"
+                          required
+                        />
+                      </div>
+                      <p><span id="error5" style="color: red;"></span></p>
+
+                      <div class="form-group col-6">
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="typeReferralX"
+                          name="referal"
+                          placeholder="Referral (if any)"
+                          onfocus="this.placeholder = ''"
+                          onblur="this.placeholder = 'Referral (if any)'"
+                        />
+                      </div>
+
+                <div class="form-group">
+                    <input type="password" 
+                    name="password" 
+                    placeholder="Password" 
+                    id="typePW"
+                    required />
+                </div>
+                <p><span id="error4" style="display: none; color: red;" ></span></p>
+                
+                <div class="form-group">
+                    <input required="" type="password" name="confirmPassword" placeholder="Confirm password">
+                </div>
+                <div class="login_footer form-group">
+                    <div class="chek-form">
+                        <div class="custome-checkbox">
+                            <input class="form-check-input" type="checkbox" name="checkbox" id="exampleCheckbox12" value="">
+                            <label class="form-check-label" for="exampleCheckbox12"><span>I agree to terms &amp; Policy.</span></label>
+                        </div>
+                    </div>
+                    <a href="page-privacy-policy.html"><i class="fi-rs-book-alt mr-5 text-muted"></i>Lean more</a>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Submit &amp; Register</button>
+                </div>
+            </form>
+            <div class="divider-text-center mt-15 mb-15">
+                <span> or</span>
+            </div>
+            <ul class="btn-login list_none text-center mb-15">
+                <li><a href="#" class="btn btn-google hover-up">Login With Google</a></li>
+            </ul>
+            <div class="text-muted text-center">Already have an account? <a href="/">Sign in now</a></div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="/public/js/userSignUp.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script>
+
+let intervalId;
+
+function startTimer() {
+    let timer = 30; 
+    const timerDisplay = document.getElementById('otpTimer');
+    const sendOtpButton = document.getElementById('sendOtp');
+    sendOtpButton.disabled = true;
+
+     intervalId = setInterval(function() {
+        timerDisplay.style.display='block'
+        timerDisplay.textContent = 'Time left: ' + timer + ' seconds';
+
+        timer--; 
+
+        if (timer < 0) {
+            clearInterval(intervalId);  
+            sendOtpButton.textContent = 'Resend OTP'
+            document.querySelector(".otp").disabled= false;
+            timerDisplay.style.display = 'none';
+        }
+    }, 1000); 
+}
+
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+
+function otpSend() {
+
+const emailInput = document.getElementById("typeEmailX").value;
+console.log(emailInput);
+
+
+if (!validateEmail(emailInput)) {
+    alert("Please enter a valid email address.");
+    return;
+}
+
+
+$.ajax({
+    url: '/sendotp',
+    type: 'POST',
+    data: JSON.stringify({ email: emailInput }),
+    contentType: 'application/json',
+    success: function(response) {
+        if(response.success){
+       
+        startTimer();
+        document.querySelector(".otp").disabled=true;
+        document.getElementById("otpMessage").innerText = "OTP has been sent to your email.";
+        otpMessage.style.display = "block";
+
+        setTimeout(function() {
+            document.getElementById('otpMessage').innerText = '';
+            document.getElementById('otpMessage').style.display = 'none';
+            }, 30000);      
+        }
+    },
+    error: function(error) {
+        console.error('Error sending OTP:', error.responseJSON.error);
+    }
+});
+}
+
+
+function otpVerify() {
+
+const enteredOtp = document.getElementById("otpverify").value;
+const sendOtpButton = document.getElementById('sendOtp');
+const timerDisplay = document.getElementById('otpTimer');
+const invalidOtpMessage = document.getElementById('otpresult');
+const otpmessage=document.getElementById("otpMessage")
+
+
+$.ajax({
+    url: '/verifyotp',
+    type: 'POST',
+    data: JSON.stringify({ otp: enteredOtp }),
+    contentType: 'application/json',
+    success: function(response) {
+        if (response.status) {
+           
+            timerDisplay.textContent = 'Verified'; 
+            clearInterval(intervalId);
+            invalidOtpMessage.textContent = '';
+            otpmessage.style.display = 'none';
+
+
+        } else {
+            
+            console.log('Invalid OTP');
+            document.getElementById('otpresult').textContent = 'Invalid OTP'; 
+            document.getElementById('otpresult').style.display='block'
+            sendOtpButton.textContent = 'Resend OTP'
+            document.querySelector(".otp").disabled= true;
+        }
+    },
+    error: function(error) {
+        console.error('Error verifying OTP:', error.responseJSON.error);
+    }
+});
+}
+
+</script>
+
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/ShoeShack/ShoeShack-frontend/page-login-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:26:06 GMT -->
+</html>

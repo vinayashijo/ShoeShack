@@ -1,0 +1,225 @@
+<%- include ('../partials/adminheader') %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Categories </h2>
+                    <p>Add, edit or delete a category</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+        
+        <% if (error) { %>
+            <p class="text-danger"><%=error%></p>                
+        <% } %>
+        <% if (message) { %>
+            <p class="text-success"><%= message %></p>                
+        <% } %>
+     
+
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form method="post" action="/addtocategory" onsubmit="return validateForm ()">
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input type="text" placeholder="Type here" name="categoryName" class="form-control" id="product_name" />
+                                    <div id="categoryName-error" class="error-message"></div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea  name="description" id="description" placeholder="Type here" class="form-control"></textarea>
+                                    <div id="description-error" class="error-message"></div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Create category</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">
+                                            </th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Edit</th>
+                                            <th>status</th>
+                                            <th >List/Unlist</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% data.forEach((row, index) => { %>
+                                        <tr>    
+                                                    <td><!-- Content for the first column, if needed --></td>
+                                                    <td><%= row.name %></td>
+                                                    <td><b><%= row.description %></b></td>
+                                                    
+                                                    <td>
+                                                        <a href="/editcategory?id=<%= row._id %>">
+
+                                                            <i class="fas fa-pencil-alt"></i> Edit
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <% if (row.islisted==true) { %>
+                                                            <span class="badge rounded-pill alert-success">Listed</span>
+                                                        <% } else { %>
+                                                            <span class="badge rounded-pill alert-danger">Unlisted</span>
+                                                        <% } %>
+                                                    </td>
+
+
+                                                    <td >
+                                                        <% if (row.islisted === true) { %>
+                                                            <button id="unlistedButton<%=row._id %>" class="btn" style="width: 70px; background-color: rgb(255, 0, 0); color: white;"  onclick="unlist('<%= row._id %>', 'Unlist')">
+                                                               Unlist
+                                                            </button>
+                                                        <% } else { %>
+                                                            <button id="listedButton<%=row._id %>" class="btn btn-success" style="width: 70px; background-color: rgb(15, 193, 15);" onclick="unlist('<%= row._id %>','list')">
+                                                              List
+                                                            </button>
+                                                        <% } %>
+                                                        
+                                                        
+                                                    </td>
+                                                  
+                                        </tr>
+                                            <% } ) %>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> 
+                    </div> 
+                </div> 
+            </div> 
+        </section> 
+        <footer class="main-footer font-xs">
+            <div class="row pb-30 pt-15">
+                <div class="col-sm-6">
+                    <script>
+                    document.write(new Date().getFullYear())
+                    </script> ©, ShoeShack - HTML Ecommerce Template .
+                </div>
+                <div class="col-sm-6">
+                    <div class="text-sm-end">
+                        All rights reserved
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <script src="/public/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="/public/admin/assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="/public/admin/assets/js/vendors/select2.min.js"></script>
+    <script src="/public/admin/assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="/public/admin/assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <!-- Main Script -->
+    <script src="/public/admin/assets/js/main.js" type="text/javascript"></script>
+ 
+    <script>
+        function unlist(categoryId,clicked) {
+           let confirmationMessage 
+             if (clicked === 'Unlist') {
+                confirmationMessage = "Are you sure you want to unlist this category?" 
+             }else{
+              confirmationMessage = "Are you sure you want to list this category?"
+             }
+                 
+         swal({
+             text: confirmationMessage ,
+             buttons: ["cancel", true],
+         }).then((result) => {
+             if (result) {
+                 $.ajax({
+                     url: `/unlist?id=${categoryId}`,
+                     method: 'PATCH',
+                     contentType: 'application/json',
+                     success: function(data) {
+                         if (data.success) {
+                         if (clicked === 'Unlist') {
+                          swal("Category Unlisted!", {
+                             icon: "success",
+                         }).then(() => {
+                             location.reload();
+                         });
+                     } else {
+                         swal("Category Listed!", {
+                             icon: "success",
+                         }).then(() => {
+                            
+                             location.reload();
+                         });
+                     }
+                 } else {
+                     console.error('Unlisting failed');
+                 }
+             },
+                     error: function(error) {
+                         
+                         swal("Oops!", "Failed to unlist the category. Please try again.", "error");
+                         console.error('AJAX error:', error);
+                     }
+                 });
+             } else {
+             }
+         });
+     }
+     
+    setTimeout(() => {
+        const insertmessage = document.getElementById("insertmessage");
+        insertmessage.style.display = "none";
+    }, 2000);
+
+
+
+    function validateForm() {
+    const categoryName = document.getElementById('product_name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const alphabetRegex =  /^[a-zA-Z.\s]+$/;
+
+    if (!categoryName) {
+        document.getElementById('categoryName-error').innerText = 'Name is required';
+        return false;
+    } else if (!alphabetRegex.test(categoryName)) {
+        document.getElementById('categoryName-error').innerText = "Category Name should contain only alphabets";
+        return false;
+    } 
+    
+    else {
+        document.getElementById('categoryName-error').innerText = '';
+    }
+
+    if (!description) {
+        document.getElementById('description-error').innerText = 'Description is required';
+        return false;
+    } else {
+        document.getElementById('description-error').innerText = '';
+    }
+
+    return true;
+}
+
+    </script>
+
+
+
+
+</body>
+
+     </script>
+
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/ShoeShack/ShoeShack-backend/page-categories.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->
+</html>

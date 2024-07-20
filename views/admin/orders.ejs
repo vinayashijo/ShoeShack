@@ -1,0 +1,157 @@
+<%- include('../partials/adminheader') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List</h2>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3 align-items-center">
+                <form action="/orders" method="GET" class="d-flex" id="searchForm">
+                    <div class="col-lg-4 col-md-6 m-2">
+                        <input type="text" name="search" placeholder="Search..." class="form-control" value="<%= search %>">
+                    </div>
+                    <button type="submit" class="btn btn-primary m-2">Search</button>
+                </form>
+            </div>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive" id="orderListContainer">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="align-middle" scope="col">Order ID</th>
+                            <th class="align-middle" scope="col">Billing Name</th>
+                            <th class="align-middle" scope="col">Date</th>
+                            <th class="align-middle" scope="col">Total</th>
+                            <th class="align-middle" scope="col">Order Status</th>
+                            <th class="align-middle" scope="col">Payment Status</th>
+                            <th class="align-middle" scope="col">Payment Method</th>
+                            <th class="align-middle" scope="col">View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                            <tr>
+                                <td><a href="#" class="fw-bold">#<%= order.trackingId %></a></td>
+                                <td><%= order.userId.name %></td>
+                                <td><%= moment(order.orderDate).format(shortDateFormat) %></td>
+                                <td>₹<%= order.totalprice.toFixed(2) %></td>
+                                <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> <%= order.orderStatus %></td>
+                                <td><span class="badge badge-pill badge-soft-success"><%= order.paymentStatus %></span></td>
+                                <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> <%= order.paymentMethod %></td>
+                                <td><a href="/orderdetails/<%= order._id %>" class="btn btn-xs">View details</a></td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center">No orders found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Pagination Section Begin -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= prevPage %>&search=<%= search %>" data-page="<%= prevPage %>">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                <% } %>
+                <% if (currentPage > 2) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=1&search=<%= search %>" data-page="1">1</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <% } %>
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>" data-page="<%= currentPage - 1 %>"><%= currentPage - 1 %></a>
+                    </li>
+                <% } %>
+                <li class="page-item active">
+                    <span class="page-link"><%= currentPage %></span>
+                </li>
+                <% if (hasNextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>" data-page="<%= currentPage + 1 %>"><%= currentPage + 1 %></a>
+                    </li>
+                <% } %>
+                <% if (nextPage !== lastPage && currentPage !== lastPage) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= lastPage %>&search=<%= search %>" data-page="<%= lastPage %>"><%= lastPage %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage !== lastPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= nextPage %>&search=<%= search %>" data-page="<%= nextPage %>">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+    <!-- Pagination Section End -->
+</section>
+</main>
+<%- include('../partials/adminfooter') %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const paginationLinks = document.querySelectorAll('.pagination-link');
+        const orderListContainer = document.getElementById('orderListContainer');
+        const searchForm = document.getElementById('searchForm');
+
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                fetchOrders(page);
+            });
+        });
+
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams(formData).toString();
+            fetchOrders(1, searchParams);
+        });
+
+        function fetchOrders(page, searchParams = '') {
+            fetch(`/orders?page=${page}&${searchParams}`)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const newOrderList = doc.getElementById('orderListContainer').innerHTML;
+                    orderListContainer.innerHTML = newOrderList;
+
+                    // Update pagination links
+                    const newPagination = doc.querySelector('.pagination-area').innerHTML;
+                    document.querySelector('.pagination-area').innerHTML = newPagination;
+
+                    // Re-attach event listeners to new pagination links
+                    const newPaginationLinks = document.querySelectorAll('.pagination-link');
+                    newPaginationLinks.forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const page = this.getAttribute('data-page');
+                            fetchOrders(page);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching orders:', error));
+        }
+    });
+</script>

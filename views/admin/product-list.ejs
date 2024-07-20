@@ -1,0 +1,176 @@
+<%- include ('../partials/adminheader') %>
+<main>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Product List </h2>
+        </div>
+        <div class="d-grid">
+            <a href="/addproductpage" class="btn btn-primary">Add Products</a>
+        </div>
+        
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <input type="text" placeholder="Search..." class="form-control">
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select>
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Images</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Regular price</th>
+                            <th scope="col">Discount</th>
+                            <th scope="col">Stock</th>
+                            <th scope="col">Edit</th>
+                            <th scope="col">Status</th>
+                            <th  scope="col"> List/Unlist </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.forEach((row, index) => { %>
+                        <tr >
+                            <td>
+                                <img src="/public/photos/<%= row.productImage[0] %>" style="width: 50px; height: 50px" alt="Product Image" >
+                            </td>                            
+                            <td><%= row.productName %></td>
+                            <td><%= row.category.name %></td>
+                            <td><%= row.regularPrice %></td>
+                            <td><%= row.discount %>%</td>
+                            <td><%= row.stock %></td>
+                            <td>
+                                <a href="/editproductpage?id=<%= row._id %>">
+                                    <i class="fas fa-pencil-alt"></i> Edit
+                                </a>
+                                
+                            </td>
+                            <td>
+                                <% if (row.isBlocked===false) { %>
+                                    <span class="badge rounded-pill alert-success">Listed</span>
+                                <% } else { %>
+                                    <span class="badge rounded-pill alert-danger">Unlisted</span>
+                                <% } %>
+                            </td>
+
+
+                            <td >
+                                <% if (row.isBlocked === false) { %>
+                                    <button type="button" class="btn btn-sm font-sm rounded" style="width: 70px; background-color: rgb(255, 0, 0); color: white;" onclick="blockOrUnblockProduct('<%= row._id %>','list')">UnList</button>
+
+                                <% } else { %>
+                                    <button type="button" class="btn btn-sm font-sm rounded " style="width: 70px; background-color: rgb(15, 193, 15);" onclick="blockOrUnblockProduct('<%= row._id %>','Unlist')">List</button>
+                                <% } %>
+                                        
+                            </td>
+                        </tr>
+                        <% } ) %>
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+      <!-- Pagination Section Begin -->
+      <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>&cat=<%= cat %>">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                <% } %>
+                <% for (let i = 1; i <= lastPage; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>&search=<%= search %>&cat=<%= cat %>"><%= i < 10 ? '0' + i : i %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < lastPage) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>&cat=<%= cat %>">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+    <!-- Pagination Section End -->
+
+    </section> <!-- content-main end// -->
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+
+
+
+function blockOrUnblockProduct(productId, clicked) {
+let confirmationMessage;
+if (clicked === 'Unlist') {
+    confirmationMessage = "Are you sure you want to Block this product?";
+} else {
+    confirmationMessage = "Are you sure you want to UnBlock this product?";
+}
+
+swal({
+    text: confirmationMessage,
+    buttons: ["cancel", true],
+}).then((result) => {
+    if (result === true) {
+        $.ajax({
+            url: `/productunlist?id=${productId}`,
+            method: 'PATCH',
+            contentType: 'application/json',
+            success: function (response) {
+                if (response.success) {
+                    if (clicked === 'Unlist') {
+                        swal("Product Unlisted!", {
+                            icon: "success",
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        swal("Product Listed!", {
+                            icon: "success",
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                } else {
+                    console.error('Blocking/Unblocking failed');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Ajax error:', error);
+            }
+        });
+    }
+});
+}
+
+
+</script>
+
+<%- include ('../partials/adminfooter') %>

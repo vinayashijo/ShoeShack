@@ -1,0 +1,162 @@
+<%- include ('../partials/adminheader') %>
+
+<% var now = Date.now() %>
+
+<section class="content-main" style="background-color: white;">
+  <div class="content-header">
+      <div>
+          <h2 class="content-title card-title">Add New Coupon</h2>
+          
+          <span class="text-center w-50 mx-auto" style=" display: block;  color: rgb(23, 200, 14);" id="errormessage"></span>
+         
+      </div>
+  </div>
+  <div class="card mb-4">
+      <div class="card-body">
+          <div class="card-body">
+            <form id="coupon-form" class="forms-sample" action="/addcoupon" method="POST">
+                <div class="row" >
+                  <div class="col-lg-4 mb-4">
+                      <label  class="form-label">Coupon Name</label>
+                      <input type="text" placeholder="Type here" name="name" class="form-control border" id="couponNameX">
+                      <div id="couponName-error" class="error-message"></div>
+                  </div>
+                  <div class="col-lg-4 mb-4">
+                      <label class="form-label">Coupon Description</label>
+                      <input type="text" placeholder="Type here" name="description" class="form-control border" id="descriptionX">
+                      <div id="description" class="error-message"></div>
+                  </div>
+                </div>
+                  <div class="row" >
+                  <div class="col-lg-4 mb-4">
+                    <label class="form-label" >Starting date</label>
+                    <input type="date" class="form-control border" id="Starting-date" name="startingDate" value="<%= sdate %>" placeholder="Starting date" required oninput="validateStartingDate()">
+                    <div id="date-validation-message" style="color: red;"></div>
+                  </div>
+                  <div class="col-lg-4 mb-4">
+                            <label>Expiry date</label>
+                            <input type="date" class="form-control border" id="expiry-date" name="expiryDate" value="<%= edate %>" placeholder="Expiry date" required oninput="validateExpiryDate()">
+                            <div id="expiry-validation-message" style="color: red;"></div>
+                      </div>
+                    </div>
+                  
+                    <div class="row" >
+                      <div class="col-lg-4 mb-4">
+                           
+                        <label class="form-label">Min. amount for Discount</label>
+                        <div class="input-group">
+                          <input type="number" class="form-control border" id="minimum-amount" name="minimumAmount" value="<%= coupon.minimumAmount %>" placeholder="Type here" required>
+                        </div>
+                        <div id="minAmount-error" class="error-message"></div>
+                </div>
+                      <div class="col-lg-4 mb-4">
+                       
+                            <label for="discount-type">Discount Type</label>
+                            <select  class="form-control border" name="discountType" value="<%= coupon.discountType %>" id="discount-type" required>
+                              <option  value="percentage">Percentage</option>
+                              <option  value="fixed-amount">Fixed amount</option>
+                            </select>
+                            <div id="discountType-error" class="error-message"></div>
+                        </div>
+                    </div>
+                 
+                    <div class="row" >
+                      <div class="col-lg-4 mb-4">
+                        <label for="discount">Discount</label>
+                        <input type="number" class="form-control border" id="discount" name="discount" value="<%= coupon.discount %>" placeholder="Discount" required>
+                         <div id="discount-error" class="error-message"></div>
+                    </div>
+              
+                      <div class="col-lg-4 mb-4">
+                           
+                        <label class="form-label">Max. Discount</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control border" id="max-discount" name="maxDiscount" value="<%= coupon.maxDiscount %>" placeholder="Type here" required>
+                          </div>
+                          <div id="maxDiscount-error" class="error-message"></div>
+                       </div>
+                        
+                       
+                      </div>  
+                <br>
+             
+                  <div>
+                     <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                    <a href="/coupons"><button type="button" class="btn  btn-primary  mr-2">Cancel</button></a>
+                  </div>
+              </form>
+
+        </script>
+      </div> <!-- card-body end// -->     
+  </div> <!-- card end// -->
+</section> <!-- content-main end// -->
+
+<script>
+
+        // Check if the error flag is present in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error') && urlParams.get('error') === 'coupon-exists') {
+            alert('Coupon name already exists');
+        }
+     
+        function validateMaxDiscount() {
+            const maxAmountInput = document.getElementById('max-discount');
+            const discountInput = document.getElementById('discount');
+            const validationMessage = document.getElementById('maxDiscount-error');
+
+            const discount = discountInput.value
+            const maxAmount = maxAmountInput.value
+            if(discount>0 )
+            {
+               validationMessage.textContent = 'Discount must be positive.';
+                maxAmountInput.setCustomValidity('Invalid');
+            }
+
+            if (discount < maxAmount) {
+              validationMessage.textContent = 'Discount must be today or in the future.';
+              maxAmountInput.setCustomValidity('Invalid');
+            } else {
+            validationMessage.textContent = '';
+            maxAmountInput.setCustomValidity('');
+            }
+        }
+
+        function validateStartingDate() {
+            const startingDateInput = document.getElementById('Starting-date');
+            const validationMessage = document.getElementById('date-validation-message');
+            // alert(startingDateInput)
+            const selectedDate = new Date(startingDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+
+            if (selectedDate < today) {
+            validationMessage.textContent = 'Starting date must be today or in the future.';
+            startingDateInput.setCustomValidity('Invalid');
+            } else {
+            validationMessage.textContent = '';
+            startingDateInput.setCustomValidity('');
+            }
+        }
+
+        function validateExpiryDate() {
+            const expiryDateInput = document.getElementById('expiry-date');
+            const validationMessage = document.getElementById('expiry-validation-message');
+
+            // alert(expiryDateInput)
+            const selectedDate = new Date(expiryDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set time to the beginning of the day
+
+            if (selectedDate <= today) {
+            validationMessage.textContent = 'Expiry date must be greater than today.';
+            expiryDateInput.setCustomValidity('Invalid');
+            } else {
+            validationMessage.textContent = '';
+            expiryDateInput.setCustomValidity('');
+            }
+        }
+</script>
+
+<%- include('../partials/adminfooter') %>
+
+

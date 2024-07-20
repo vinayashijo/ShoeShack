@@ -1,0 +1,156 @@
+<%- include('../partials/userheader') %>
+
+<style>
+  /* Your existing styles */
+</style>
+
+<div class="main-div m-5">
+    <section class="font-1">
+        <div class="">
+            <div class="row justify-content-center">
+                <div class="col-md-9 pl-lg-5">
+                    <div class="row">
+                        <div class="col-lg-8 mt-5 mt-lg-0">
+                            <h4 class="color-black mb-2">Add New Address</h4>
+                        </div>
+                    </div>
+                    <form class="mt-5 row" id="addressForm" action="/orderaddaddress" method="post">
+                        <div id="errorMessageContainer"></div>
+                        <div class="col-md-12">
+                            <input class="form-control mb-3" type="text" name="name" required placeholder="Full Name">
+                        </div>
+                        <div class="col-md-12">
+                            <input class="form-control mb-3" type="number" name="mobile" required placeholder="Mobile">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="text" name="houseName" required placeholder="House name">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="text" name="cityOrTown" required placeholder="City/Town">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="number" name="pincode" required placeholder="PIN Code">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="text" name="district" required placeholder="District">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="text" name="state" required placeholder="State">
+                        </div>
+                        <div class="col-12">
+                            <input class="form-control mb-3" type="text" name="country" required placeholder="Country">
+                        </div>
+                        <div class="col-2">
+                            <input class="mt-4 btn btn-dark btn-save rounded-0" value="Save" type="submit">
+                        </div>
+                        <div class="col-3">
+                          <a href="/checkout" class="col-10">
+                        <div class="mt-4 btn btn-cancel rounded-0">Cancel</div>
+                    </a>
+                    </div>  
+                </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<%- include('../partials/userfooter') %>
+
+<!-- Validation Script -->
+<script>
+document.getElementById('addressForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting
+
+    // Get form input values
+    const fullName = document.getElementsByName('name')[0].value.trim();
+    const mobile = document.getElementsByName('mobile')[0].value.trim();
+    const houseName = document.getElementsByName('houseName')[0].value.trim();
+    const cityOrTown = document.getElementsByName('cityOrTown')[0].value.trim();
+    const pincode = document.getElementsByName('pincode')[0].value.trim();
+    const district = document.getElementsByName('district')[0].value.trim();
+    const state = document.getElementsByName('state')[0].value.trim();
+    const country = document.getElementsByName('country')[0].value.trim();
+
+    // Remove any existing error messages
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(function(errorMessage) {
+        errorMessage.remove();
+    });
+
+    let hasError = false; // Track if there is any error
+
+    if (fullName === '') {
+        displayErrorMessage('name', 'Full Name is required');
+        hasError = true;
+    }
+
+    if (mobile === '') {
+        displayErrorMessage('mobile', 'Mobile is required');
+        hasError = true;
+    } else if (!/^\d{10}$/.test(mobile)) {
+        displayErrorMessage('mobile', 'Mobile number should be a 10-digit number');
+        hasError = true;
+    }
+
+    if (houseName === '') {
+        displayErrorMessage('houseName', 'House name is required');
+        hasError = true;
+    }
+
+    if (cityOrTown === '') {
+        displayErrorMessage('cityOrTown', 'City/Town is required');
+        hasError = true;
+    }
+
+    if (pincode === '') {
+        displayErrorMessage('pincode', 'PIN Code is required');
+        hasError = true;
+    } else if (!/^\d+$/.test(pincode)) {
+        displayErrorMessage('pincode', 'PIN Code should contain only numbers');
+        hasError = true;
+    }
+
+    if (district === '') {
+        displayErrorMessage('district', 'District is required');
+        hasError = true;
+    }
+
+    if (state === '') {
+        displayErrorMessage('state', 'State is required');
+        hasError = true;
+    }
+
+    if (country === '') {
+        displayErrorMessage('country', 'Country is required');
+        hasError = true;
+    }
+
+    if (!hasError) {
+        this.submit();
+    }
+});
+
+function displayErrorMessage(inputName, message) {
+    const form = document.getElementById('addressForm');
+    let errorMessageContainer = document.getElementById('errorMessageContainer');
+
+    if (!errorMessageContainer) {
+        const container = document.createElement('div');
+        container.id = 'errorMessageContainer';
+        form.insertBefore(container, form.firstChild);
+        errorMessageContainer = container;
+    }
+
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'col-md-12 form-group error-message';
+    errorMessage.innerHTML = `
+        <label style="border: 1px solid rgb(196, 0, 0); padding: 15px 10px; width: 100%; background-color: rgb(255, 172, 172); color: rgb(196, 0, 0);" for="${inputName}">
+            ${message}
+        </label>
+    `;
+
+    errorMessageContainer.innerHTML = '';
+    errorMessageContainer.appendChild(errorMessage);
+}
+</script>

@@ -1,0 +1,269 @@
+<%- include('../partials/adminheader') %>
+
+<section class="content-main">
+    <div class="content-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="content-title card-title">Sales Report</h2>
+            <p>Management Reports</p>
+        </div>
+        <a type="button" onclick="generatePDF()" class="btn btn-primary">
+            <i class="text-muted material-icons md-post_add"></i>PDF 
+        </a>
+        <a type="button" onclick="excelDownload()" class="btn btn-primary" id="excel-export">
+            <i class="text-muted material-icons md-post_add"></i>Excel 
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-primary-light">
+                        <i class="text-primary material-icons md-monetization_on"></i>
+                    </span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Amount</h6>
+                        <span>₹ <%= overallOrderAmount.toFixed(2) %></span>
+                        <span class="text-sm">Shipping - not included</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-success-light">
+                        <i class="text-success material-icons md-local_shipping"></i>
+                    </span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Orders</h6>
+                        <span><%= overallSalesCount %></span>
+                        <span class="text-sm">Delivered Orders Only</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-warning-light">
+                        <i class="text-warning material-icons md-qr_code"></i>
+                    </span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Products</h6>
+                        <span><%= overallProductCount %></span>
+                        <span class="text-sm">In 2 Categories of various Brands</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-info-light">
+                        <i class="text-info material-icons md-shopping_basket"></i>
+                    </span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Monthly Earning</h6>
+                        <span>₹ <%= currentMonthEarning.toFixed(2) %></span>
+                        <span class="text-sm">base of your local time.</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <header class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="card-title">Latest orders</h4>
+            <!-- <form class="d-flex align-items-center" action="/salesreport"> -->
+                <form id="select-form" class="d-flex align-items-center" action="/salesreport">
+          
+                <div class="me-3">
+                    <select class="form-select" name="period">
+                        <option selected>Custom</option>
+                        <option >Daily</option>
+                        <option>Weekly</option>
+                        <option>Monthly</option>
+                        <option>Yearly</option>
+                    </select>
+                </div>
+            </form>
+        </header>
+
+        <div class="card-body">
+            <form id="sales-report-form" action="/salesreport">
+                <div class="row mb-4">
+                    <div class="col-12 col-sm-3 mb-3">
+                        <label for="from">&emsp;Starting Date:</label>
+                        <input class="form-select" type="date" id="from" name="from" value="<%= from %>"
+                        style="background-color: #dcdcdc; border-radius: 5px; border: none; padding: 0px 10px;" >
+                    </div>
+                    <div class="col-12 col-sm-3 mb-3">
+                        <label class="" for="to">Ending Date:</label>
+                        <input class="form-select" type="date" id="to" name="to" value="<%= to %>"  style="background-color: #dcdcdc; border-radius: 5px; border: none; padding: 0px 10px;" >
+                    </div>
+                    <div class="col-12 col-sm-3 mb-3 mt-4">
+                        <label class="" ></label>
+                        <button class="btn btn-primary"  type="submit">Filter</button>
+                    </div>
+                </div>
+            </form>
+            </form>
+            <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center">
+                                <div class="form-check align-middle">
+                                    <input class="form-check-input" type="checkbox" id="transactionCheck01">
+                                    <label class="form-check-label" for="transactionCheck01"></label>
+                                </div>
+                            </th>
+                            <th class="align-middle" scope="col">Order ID</th>
+                            <th class="align-middle" scope="col">Billing Name</th>
+                            <th class="align-middle" scope="col">Date</th>
+                         
+                            <th class="align-middle" scope="col">Total</th>
+                            <th class="align-middle" scope="col">Order Status</th>
+                            <th class="align-middle" scope="col">Pay Mode</th>
+                            <th class="align-middle" scope="col">Payment Status</th>
+                          
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="orderCheck<%= order._id %>">
+                                            <label class="form-check-label" for="orderCheck<%= order._id %>"></label>
+                                        </div>
+                                    </td>
+                                    <td><a href="#" class="fw-bold">#<%= order.trackingId %></a></td>
+                                    <td><%= order.billingdetails.name %></td>
+                                    <td><%= order.orderDate %></td>
+                                  
+                                    <td>₹<%= order.totalprice.toFixed(2) %></td>
+                                    <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> <%= order.orderStatus %></td>
+                                    <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> <%= order.paymentMethod %></td>
+                                    <td><span class="badge badge-pill badge-soft-success"><%= order.paymentStatus %></span></td>
+                                 
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center">No orders found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('../partials/adminfooter') %>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const periodSelect = document.querySelector('select[name="period"]');
+        const fromInput = document.querySelector('input[name="from"]');
+        const toInput = document.querySelector('input[name="to"]');
+        const currentDate = new Date();
+    
+        periodSelect.addEventListener('change', function () {
+        let startDate, endDate;
+        // alert(this.value)
+
+        switch (this.value) {
+            case 'Daily':
+                startDate = new Date(currentDate );
+                startDate.setDate(startDate.getDate() + 1); 
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() + 1); 
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            case 'Weekly':
+                startDate = new Date(currentDate);
+                startDate.setDate(currentDate.getDate() - 5 ); 
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() + 1); 
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            case 'Monthly':
+                startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                break;
+            case 'Yearly':
+                startDate = new Date(currentDate.getFullYear(), 0, 1);
+                endDate = new Date(currentDate.getFullYear(), 11, 31);
+                break;
+            default:
+                startDate = new Date();
+                endDate = new Date();
+                break;
+        }
+
+        fromInput.value = startDate.toISOString().slice(0, 10);
+        toInput.value = endDate.toISOString().slice(0, 10);
+    });
+});
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.text("Sales Report", 10, 20);
+        // doc.text("Management Reports", 10, 20);
+
+        const amount = '<%= overallOrderAmount %>';
+        const orders = '<%= overallSalesCount %>';
+        const products = '<%= overallProductCount %>';
+        const monthlyEarnings = '<%= currentMonthEarning %>';
+
+        doc.text(`Amount: ₹${amount}`, 10, 30);
+        doc.text(`Orders: ${orders}`, 10, 40);
+        doc.text(`Products: ${products}`, 10, 50);
+        doc.text(`Monthly Earnings: ₹${monthlyEarnings}`, 10, 60);
+
+        const element = document.querySelector(".table-responsive table"); // Get the table element
+
+        // Get the table headers
+        const headers = Array.from(element.querySelectorAll("thead th")).map(th => th.innerText);
+
+        // Get the table rows
+        const rows = Array.from(element.querySelectorAll("tbody tr")).map(tr => {
+            return Array.from(tr.querySelectorAll("td")).map(td => td.innerText);
+        });
+
+        // Set initial y position for placing content
+        let y = 70;
+
+        // Create a new jsPDF table
+        doc.autoTable({
+            startY: y,
+            head: [headers],
+            body: rows
+        });
+
+            // Save the PDF
+        // doc.save("sales-report.pdf");
+
+        doc.save('sales_report.pdf');
+    }
+
+    function excelDownload() {
+    var table = document.querySelector("table");
+    var wb = XLSX.utils.table_to_book(table, {sheet: "Sheet JS"});
+    XLSX.writeFile(wb, "sales_report.xlsx");
+}
+</script>

@@ -1,0 +1,228 @@
+
+<%- include('../partials/adminheader') %>
+
+<style>
+    .dropdown-menu a:hover{
+        color: white!important;
+        cursor: pointer;
+    }
+    .pagination-btn{
+    padding: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    }
+    .pagination-btn a{
+        text-decoration: none;
+        color: #ececec;
+    }
+    .pagination-btn a :hover{
+        color: #1111111a;
+    }
+    .pagination-btn button:hover{
+        color: #111;
+    }
+    .pagination-btn button:active{
+        background-color: #fff;
+        color: #111!important;
+    }
+    
+</style>
+
+<div class="main-panel">
+    <div class="content-wrapper">
+
+      <div class=" row   mt-3">
+
+        <div class="col-12 col-sm-6">
+          <div class="row m-0">
+            <div class="col-md-6">
+              <div class="form-group row">
+                <div class="col-sm-12">
+                  <form action="/orders">
+                  <select class="form-control" name="sortData">
+                    <option value="date" >Date</option>
+                    <option value="totalPrice" >Amount</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="form-group row">
+                <div class="col-sm-12">
+                  <select class="form-control" name="sortOrder">
+                    <option>Ascending</option>
+                    <option>Descending</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="sort form-group col-md-4 "><button class=" btn btn-primary form-control">
+              sort
+            </button></div>
+          </form>
+          </div>
+        </div>
+
+        </div>
+
+<div class="row mt-5">
+    <div class="col-12 grid-margin">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Orders</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th> Date </th>
+                  <th> OrderId </th>
+                  <th>Invoice Id</th>
+                  <th> Payment </th>
+                  <th> Amount </th>
+                  <th> Payment Status </th>
+                  <th>Return Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <% for ( let order of orders ) { %>
+                <tr>
+                  <td> <%= order.orderDate %> </td>
+                  <td> <%= order._id %> </td>
+                  <td><%= order.trackingId %></td>
+                  <td> <%= order.paymentMethod %> </td>
+                  <td> <%= order.totalprice.toFixed(2) %> </td>
+                  <td> <%= order.paymentStatus %> </td>
+                  <!-- <td id="order-status-<%= order._id %>"> <% if(order.paymentStatus) { %> <%= order.paymentStatus %> <% } 
+                    else { %> Pending <% } %> </td>
+                  <td>
+                    <% if( order.paymentStatus === 'Confirmed' || order.paymentStatus === 'Shipped' ){ %>
+                    <div class="dropdown" id="dropdown-<%= order._id %>">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Change Order status</button>
+                        <div class="dropdown-menu bg-light text-dark" aria-labelledby="dropdownMenuButton1">
+                            <% if( order.paymentStatus === 'Confirmed'){ %>
+                                <a id="delivered-<%= order._id %>" onclick="changeOrderStatus('Delivered','<%= order._id %>')" class="text-dark dropdown-item">Delivered</a>
+                                <a id="shipped-<%= order._id %>" onclick="changeOrderStatus('Shipped','<%= order._id %>')" class="text-dark dropdown-item">Shipped</a>
+                                <a id="cancelled-<%= order._id %>" onclick="changeOrderStatus('Cancelled','<%= order._id %>')" class="text-dark dropdown-item">Cancelled</a>
+                            <% } else { %>
+                                <% if( order.paymentStatus === 'Shipped' ){ %>
+                                    <a id="delivered-<%= order._id %>" onclick="changeOrderStatus('Delivered','<%= order._id %>')" class="text-dark dropdown-item">Delivered</a>
+                                    <a id="cancelled-<%= order._id %>" onclick="changeOrderStatus('Cancelled','<%= order._id %>')" class="text-dark dropdown-item">Cancelled</a>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } else if (order.paymentStatus === 'Pending') { %>
+                        <div class="dropdown" id="dropdown-<%= order._id %>">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton-<%= order._id %>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Change Status
+                            </button>
+                            <div class="dropdown-menu bg-light text-dark" aria-labelledby="dropdownMenuButton-<%= order._id %>">
+                              
+                                <a id="cancelled-<%= order._id %>" onclick="changeOrderStatus('Cancelled', '<%= order._id %>')" class="text-dark dropdown-item">Cancelled</a>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    
+                  </td> -->
+                  <td>
+                      <%= order.ReturnReason %>
+                      </td>
+                      <td> 
+                        <a href="/orderdetails/<%= order._id %>" class="btn btn-secondary"> view products</a>
+                      </td>   
+                </tr>
+                <% } %>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination buttons -->
+<div class="pagination-btn">
+    <% if (currentPage > 1) { %> 
+        <a href="/admin/orders?page=<%= prevPage %><% if (sortData) { %>&sortData=<%= sortData %><% } %><% if (sortOrder) { %>&sortOrder=<%= sortOrder %><% } %>"
+            ><button type="button" class="btn btn-outline-secondary"><i class="fas fa-chevron-left"></i> Previous</button></a>
+    <% } %>
+    <% if (hasNextPage) { %>
+        <a href="/admin/orders?page=<%= nextPage %><% if (sortData) { %>&sortData=<%= sortData %><% } %><% if (sortOrder) { %>&sortOrder=<%= sortOrder %><% } %>"
+            ><button type="button" class="btn btn-outline-secondary">Next <i class="fas fa-chevron-right"></i></button></a>
+    <% } %>
+</div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+</div>
+
+<!-- The popup message modal -->
+<div id="popupModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content bg-light text-dark">
+      <div class="modal-body">
+      <h5 id="modalHead" class="modal-title"></h5><br>
+      <p id="modalContent"></p>
+      </div>
+  </div>
+  </div>
+</div>
+
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    
+    async function changeOrderStatus(status,orderId){
+               
+        const changeStatus = await axios.patch('/change-order-status',{status,orderId})
+        if( changeStatus.data.status === 'Shipped'){
+            const shipped = document.getElementById(`shipped-${orderId}`)
+            const orderStatus = document.getElementById(`order-status-${orderId}`)
+            orderStatus.innerHTML = changeStatus.data.status
+            shipped.style.display = 'none'
+            showModal( 'success', 'Status updated' )
+        }
+        if(changeStatus.data.status === 'Delivered' || changeStatus.data.status === 'Cancelled'){
+            const dropdown = document.getElementById(`dropdown-${orderId}`)
+            const orderStatus = document.getElementById(`order-status-${orderId}`)
+            orderStatus.innerHTML = changeStatus.data.status
+            dropdown.style.display = 'none'
+            showModal( 'success', 'Status updated' )
+        }
+    }
+
+    function showModal(title,message) {
+
+    const modalTitle = document.getElementById('modalHead')
+    const modalBody = document.getElementById('modalContent')
+
+    modalTitle.innerText = title;
+    modalBody.innerText = message;
+
+
+    // Show the popup message modal
+    $('#popupModal').modal('show');
+
+    // Hide the popup message modal when clicking outside of it
+    $(document).on('click', function(event) {
+    if (!$(event.target).closest('.modal-content').length) {
+    $('#popupModal').modal('hide');
+    }
+    });
+
+    }
+</script>
+
+  <%- include('../partials/adminfooter') %>

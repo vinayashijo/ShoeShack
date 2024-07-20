@@ -1,0 +1,102 @@
+<%- include('../partials/adminheader') %>
+
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Categories </h2>
+                    <p>Add, edit or delete a category</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div>
+            </div>
+        </div>
+        <% if (error) { %>
+            <p class="text-danger"><%=error%></p>                
+        <% } %>
+      </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <form method="post" onsubmit="return validateForm()" action="/updatecategory/<%= data[0]._id %>">
+                                <input type="hidden" name="categoryId" value="<%= data[0]._id %>">
+
+                              <div class="mb-4">
+                                    <label for="category_name" class="form-label">Name</label>
+                                    <input type="text" name="categoryName" value="<%= data[0].name %>" class="form-control" id="categoryX" />
+                                    <div id="categoryName-error" class="text-danger"></div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" id="descriptionX" class="form-control"><%= data[0].description %></textarea>
+                                    <div id="description-error" class="text-danger"></div>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Update Category</button>
+                                </div>
+                            </form>
+                    </div>
+                </main>
+                <%- include('../partials/adminfooter') %>
+
+
+    <script src="/public/admin-assets/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="/public/admin-assets/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="/public/admin-assets/js/vendors/select2.min.js"></script>
+    <script src="/public/admin-assets/js/vendors/perfect-scrollbar.js"></script>
+    <script src="/public/admin-assets/js/vendors/jquery.fullscreen.min.js"></script>
+
+    <script>
+
+
+setTimeout(() => {
+            const insertmessage = document.getElementById("insertmessage");
+            insertmessage.style.display = "none";
+        }, 5000)
+
+
+    function validateForm() {
+    const categoryName = document.getElementById('categoryX').value.trim();
+    const description = document.getElementById('descriptionX').value.trim();
+    const alphabetRegex =  /^[a-zA-Z.\s]+$/;
+
+    if (!categoryName) {
+        document.getElementById('categoryName-error').innerText = 'Name is required';
+        return false;
+    } else if (!alphabetRegex.test(categoryName)) {
+        document.getElementById('categoryName-error').innerText = "Category Name should contain only alphabets";
+        return false;
+    } 
+    
+    else {
+        document.getElementById('categoryName-error').innerText = '';
+    }
+
+    if (!description) {
+        document.getElementById('description-error').innerText = 'Description is required';
+        return false;
+    } else {
+        document.getElementById('description-error').innerText = '';
+    }
+
+    return true;
+}
+        
+        
+        // function displayErrorMessage(elementId, message) {
+        //     var errorElement = document.getElementById(elementId);
+        //     errorElement.innerText = message;
+        //     errorElement.style.display = "block";
+        //     errorElement.style.color = "red";
+        // }
+    
+        // function resetErrorMessages() {
+        //     var errorElements = document.querySelectorAll(".error-message");
+        //     errorElements.forEach(function (element) {
+        //         element.innerText = "";
+        //         element.style.display = "none";
+        //     });
+        // }
+            
+    </script>

@@ -1,0 +1,54 @@
+<%- include('../includes/userHead.ejs') %>
+<%- include('../includes/userNavbar.ejs') %>
+
+<style>
+    .main-div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    
+    .center-container {
+        text-align: center;
+        background: #f8f9fa;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0px 10px 40px 0px rgba(56,74,235,0.2);
+    }
+
+    .download-button {
+        background-color: #1b8f27;
+        color: white;
+        border: none;
+        padding: 15px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .download-button:hover {
+        background-color: #147121;
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+        <img width="64" height="64" src="https://img.icons8.com/external-flaticons-flat-flat-icons/64/external-failure-working-stress-flaticons-flat-flat-icons-2.png" alt="external-failure-working-stress-flaticons-flat-flat-icons-2"/>
+        <h1 class="mb-4 text-success text-muted" role="alert">Payment FAILED !!!</h1>
+        <p class="text-center">Your order has not been completed due to technical issues !</p>
+        <p class="text-center"> You can retry payment from order page - (View option)!</p>
+        <div>
+            <a href="/getprofile#orders"><button type="button" class="btn btn-primary mx-2">Retry Payment</button></a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function redirectToOrders() {
+        window.location.href = '/getprofile/orders';
+    }
+</script>
+
+<%- include('../includes/userFooter.ejs') %>
+<%- include('../includes/end.ejs') %>

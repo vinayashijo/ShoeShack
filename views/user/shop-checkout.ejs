@@ -1,0 +1,263 @@
+﻿<%- include('../partials/userheader') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+    .address-label input[type="radio"] {
+        margin-right: 10px;
+        width: auto;
+        height: auto;
+    }
+    .order-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .order-total-row .label, .order-total-row .value {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .order-total-row .label {
+        margin-right: 10px;
+    }
+</style>
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Checkout
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <% if (address && address.length > 0) { %>
+                        <% address.forEach((items, index) => { %>
+                            <div class="row address mb-4">
+                                <label for="address-<%= items._id %>" class="address-label">
+                                    <input type="radio" id="address-<%= items._id %>" name="addressId" value="<%= items._id %>" <% if (index === 0) { %>checked<% } %> >
+                                    <span class="address-text"><%= items.name + ', ' + items.mobile + ', ' + items.houseName+ ', ' + items.cityOrTown + ', ' + items.district  + ', PIN Code: ' + items.pincode + ', ' + items.state  + ', ' + items.country %></span>
+                                </label>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                    <div class="row mt-3 address p-2">
+                        <a class="btn text-white fw-bold" href="/orderaddaddress">Add Address</a>
+                    </div>
+                   
+                    <div class="wallet-option mt-4" id="walletOptionDiv">
+                       
+                        <% if (walletBalance > 0) { %>
+                            <h5>Wallet Option</h5>
+                            <div class="wallet_optiondiv">
+                                <div class="custome-radio">
+                                    <input class="form-check-input" type="radio" name="wallet_option" id="paymentOptionRadioWallet" value="Wallet" >
+                                    <label class="form-check-label" for="paymentOptionRadioWallet"> Use Wallet Balance (₹<%= walletBalance.toFixed(2) %>)</label>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <h5>Your wallet is empty. Please choose another payment option.</h5>
+                        <% } %>
+                    </div>
+
+                    <div class="row mt-3 address p-2" id="wallet_add_div">
+                        <a class="text-green fw-bold" href="/getprofile#addtowallet">Add Money to your Wallet</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="order_review">
+                        <div class="mb-20">
+                            <h4>Your Orders</h4>
+                        </div>
+                        <div class="table-responsive order_table text-center">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Details</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% data.forEach(item => { %>
+                                        <tr>
+                                            <td class="image product-thumbnail">
+                                                <img src="/public/photos/<%= item.productId.productImage[0] %>" alt="#" onclick="return showProductDetails('<%= item.productId._id %>');">
+                                            </td>
+                                            <td>
+                                                <h5><a href="/productdetails/<%= item.productId._id %>"><%= item.productId.name %></a></h5> 
+                                                <span class="product-qty">x <%= item.quantity %></span>
+                                            </td>
+                                            <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="order-total-row">
+                            <span class="label">Total Price:</span>
+                            <span class="value">₹<%= totalPrice.toFixed(2) %></span>
+                        </div>
+                        
+                        <div class="bt-1 border-color-1 mt-30 mb-30">
+                        </div>
+                        <div class="payment_method">
+                            <div class="mb-25">
+                                <h5>Payment Options</h5>
+                            </div>
+                            <div class="payment_option">
+                                <div class="custome-radio">
+                                    <input class="form-check-input" type="radio" name="payment_option" id="paymentOptionRadioRazor" value="Razorpay" checked>
+                                    <label class="form-check-label" for="paymentOptionRadioRazor"> Razor Pay</label>
+                                </div>
+                                <% if( totalPrice <= 1000 ) { %>
+                                <div class="custome-radio">
+                                    <input class="form-check-input" type="radio" name="payment_option" id="paymentOptionRadioCOD" value="COD"  >
+                                    <label class="form-check-label" for="paymentOptionRadioCOD"> Cash On Delivery</label>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <form  id="orderForm">
+                        <input type="hidden" name="addressId" id="selectedAddressId" value="">
+                        <input type="hidden" name="paymentMethod" id="selectedPaymentMethod" value="">
+                        <input type="hidden" name="walletOption" id="selectedWalletOption" value="">
+                        <button type="button" id="submitBtn" class="btn btn-fill-out btn-block mt-30"  onclick="submitForm()" >Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<script>
+    
+    function razorpayPayment(order) {
+        const rzp_key = '<%= process.env.RAZORPAY_KEY_ID %>';
+
+        //alert(order.amount)
+
+        var options = {
+        "key": rzp_key, 
+        "amount": order.amount * 100,
+        "currency": "INR",
+        "name": "Shoe Shack", 
+        "description": "Shoe Shack Payment System",
+        "image": "/public/user/assets/imgs/theme/logo.png",
+        "order_id": order.id,
+        "handler": function (response){
+            console.log("Payment successful:", response);
+            window.location = '/confirmorder/1';
+        },
+        "notes": {
+            "address": "ShoeShack Women's Footwear"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+
+
+        var rzp1 = new Razorpay(options);
+         // Handle payment failure
+        rzp1.on('payment.failed', function (response) {
+            console.log('Payment failed:', response.error);
+            // Redirect to payment failed page
+            window.location = '/paymentfailed/0';
+        });
+
+        rzp1.open();
+    }
+
+    async function submitForm()
+        {
+        // const walletbal = JSON.parse(this.getAttribute('data-wallet'));
+
+        const walletbal = JSON.parse('<%= walletBalance %>')
+
+        try {
+            const addressRadio = document.querySelector('input[name="addressId"]:checked');
+            const paymentMethodRadio = document.querySelector('input[name="payment_option"]:checked');
+            const walletRadio = document.querySelector('input[name="wallet_option"]:checked');
+                
+            if (!addressRadio || (!paymentMethodRadio )) {
+                alert("Please select an address and payment method.");
+                return;
+            }
+       
+        const addressId = addressRadio.value;
+        const paymentMethod = paymentMethodRadio.value;
+        const walletAmount = walletRadio ? walletbal : 0;
+
+        const response = await fetch('/placeorder', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ addressId, paymentMethod, walletAmount })
+        });
+
+        const data = await response.json();
+        // console.log(data);
+
+        if (data.success) 
+        {
+                   
+            if ( data.payment === 'COD' || data.payment === 'WalletRazorPay' )
+            {
+                location.href = '/confirmorder/1';
+                // Swal.fire({ icon: 'success',  title: 'Order Placed!', text: 'Your order has been successfully placed.',
+                // }).then(() => { location.href = '/confirmorder'; });
+            }
+            else  
+            {
+                razorpayPayment(data.payment);
+            } 
+        }
+        else {
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Order Placement Failed',
+                text: data.message || 'Failed to place the order.',
+            }).then(() => {
+                    location.href = '/paymentfailed/0';
+                });
+
+        }
+
+     } catch (error) {
+        console.log(error.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while placing the order.'
+        });
+    }
+}
+
+// JavaScript to toggle wallet radio button visibility
+document.querySelectorAll('input[name="payment_option"]').forEach(function(elem) {
+    elem.addEventListener('change', function() {
+        const walletDiv = document.getElementById('walletOptionDiv');
+        const walletAddDiv = document.getElementById('wallet_add_div');
+        
+        if (this.value === 'COD') {
+            walletDiv.style.display = 'none';
+            walletAddDiv.style.display = 'none';
+
+        } else {
+            walletDiv.style.display = 'block';
+            walletAddDiv.style.display = 'block';
+
+        }
+    });
+});
+
+</script>
+
+
+<%- include('../partials/userfooter') %>

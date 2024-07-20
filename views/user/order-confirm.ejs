@@ -1,0 +1,110 @@
+<%- include('../partials/userheader') %>
+<!-- <div class="main-div m-5"> -->
+    <div class="success-page">
+        <h1>Payment Successful!</h1>
+        <b><p>Thank you for your purchase. Your order has been successfully placed.</p></b>
+        <button id="goToOrders" class="btn btn-primary">Go to Orders</button> &nbsp;
+        
+        <button id="viewInvoice" data-order="<%= JSON.stringify(order) %>"  class="btn btn-danger">View Invoice</button>
+    </div>
+<!-- </div> -->
+    <script>
+       
+        document.addEventListener('DOMContentLoaded', function() {    
+        document.getElementById('viewInvoice').addEventListener('click', function() {
+        const order = JSON.parse(this.getAttribute('data-order'));   //check in the button there is an attribute :- data-order which has data i linked to 
+          console.log("Order Data:", order); 
+
+        const { jsPDF } = window.jspdf;
+        // Initialize jsPDF correctly
+        const doc = new jsPDF();
+        let yPos = 20;
+        // Title
+        doc.setFontSize(20);
+        doc.text('INVOICE', 110, yPos, null, null, 'center');
+        yPos += 5;
+        doc.setFontSize(16);
+        doc.text('Shoe Shack',10,yPos);
+        yPos +=5;
+        doc.setFontSize(12);
+        doc.text('32ARWPV6357N1ZN',10,yPos);
+        yPos +=5;
+        doc.text('Kochi',10,yPos);
+        yPos+=15
+        // Order details
+        doc.setFontSize(12);
+        if (order) {
+            doc.text('Order ID: ' + order.trackingId , 10, yPos);
+            // yPos += 5;
+            doc.text('Date: ' + new Date().toLocaleDateString(), 170, yPos);
+          
+
+               // Shipping address
+            yPos += 15;
+            doc.setFontSize(16);   
+            doc.text('Shipping Address:', 10, yPos);
+            yPos += 10;
+            doc.setFontSize(12); 
+
+            if (order.billingdetails) {
+                const name = order.billingdetails.name ;
+                doc.text(name, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.houseName, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.cityOrTown, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.district + ', ' + order.billingdetails.state  + ', ' + order.billingdetails.pincode.toString(), 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.country, 10, yPos);
+                yPos += 10;
+            }
+            // Products table
+            if (order.items && order.items.length > 0) {
+                const bodyData = order.items.map(item =>
+                 { return [item.product.productName,  item.product.brand, item.product?.category?.name, item.price, item.quantity,(item.price * item.quantity)] });
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Product','Brand', 'Category', 'Price','Quantity', 'SubTotal']],
+                    body: bodyData,
+                    theme: 'grid',
+                    styles: { halign: 'center' },
+                });
+
+                yPos = doc.previousAutoTable.finalY + 10;
+            }
+            // Total price and discount
+            yPos += 10;
+            // Payment details
+            doc.text('SubTotal:           ' + (order.totalprice),150, yPos);
+            yPos += 5;
+
+            doc.text('GST:              ' + (order.totalprice*.05).toFixed(2), 150, yPos);
+            yPos += 5;
+
+            doc.text('Coupon Discount: ' + (order.discountAmount || '0.00'), 150, yPos);
+            yPos += 5;
+
+            doc.text('Delivery Charges: ' +  '0.00', 150, yPos);
+            yPos += 5;
+
+            doc.text('Extra Discount:   ' + (-(order.totalprice*.05).toFixed(2)  || '0.00') , 150, yPos);
+            yPos += 10;
+
+            doc.text('Total : ' + (order.totalprice || '0.00'), 150, yPos);
+            yPos += 5;
+        }
+        doc.save('invoice.pdf');
+    });
+  });
+
+        document.getElementById('goToOrders').addEventListener('click', function() {
+            // Redirect to  orders tab in the dashboard
+            window.location.href = '/getprofile#orders';
+        });
+
+      
+    </script>
+
+<%- include('../partials/userfooter') %>
+

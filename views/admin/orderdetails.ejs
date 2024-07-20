@@ -1,0 +1,297 @@
+
+<%- include('../partials/adminheader') %>
+
+
+<style>
+    .main-div {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+    /* .profile-container {
+        box-shadow: ffffffff(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px; 
+    } */
+    section {
+        width: 80%;
+    }
+    .edit-image {
+        text-decoration: none;
+    }
+    input {
+        border-radius: 0 !important;
+    }
+    input.form-control, textarea {
+        background-color: #fff;
+    }
+    input:disabled {
+        border: none;
+        background-color: #fff;
+        font-weight: bold;
+    }
+    .fs--1 a {
+        color: #7a7a7a;
+        padding: 10px;
+    }
+    .fs--1 a.active {
+        background-color: #7a7a7a;
+        color: #fff;
+    }
+    .fs--1 a:hover {
+        background-color: #7a7a7a;
+        color: white;
+    }
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+    .table th, .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .table tbody + tbody {
+        border-top: 2px solid #dee2e6;
+    }
+    .star-rating {
+        display: flex;
+    }
+    .star {
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 1.5rem;
+        color: #343a40;
+        transition: color 0.3s;
+    }
+    input[type="checkbox"] {
+        display: none;
+    }
+    input[type="checkbox"]:checked + label {
+        color: gold;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #007bff;
+    }
+    .modal-title {
+        font-size: 1.5rem;
+        margin: 0;
+        color: #007bff;
+    }
+    .modal-body {
+        padding: 15px 0;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 15px;
+        border-top: 2px solid #007bff;
+    }
+    .btn-secondary, .btn-primary {
+        padding:10px 20px;
+        margin-left: 10px;
+        }
+.comment-label {
+font-size: 1rem;
+margin-bottom: 8px;
+color: #343a40;
+}
+#comment {
+width: 100%;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+resize: vertical;
+}
+.payment-details {
+background-color: #f8f9fa;
+padding: 20px;
+border-radius: 10px;
+box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+max-width: 300px;
+width: 100%;
+height: auto;
+}
+.payment-details h5 {
+margin-bottom: 20px;
+font-weight: bold;
+}
+.payment-details p {
+margin: 5px 0;
+}
+.retry-payment-btn {
+margin-top: 10px;
+}
+</style>
+
+    <section class="content-main">
+        <div class="container" >
+            
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Order Details </h2>
+            </div>
+            <div>
+                <input type="text" placeholder="Search order ID" class="form-control bg-white">
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <div class="row">
+   
+    
+
+    <div class="col-12 col-md-8">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <!-- <% if(order.status === 'Delivered') { %>
+                            <th>Rating</th>
+                        <% } %> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (order.items)  { %>
+                    <% order.items.forEach(item => { %>
+                        <tr>
+                            <td>
+                                <a href="/productdetails/<%= item.product._id %>">
+                                    <img width="100" src="/public/photos/<%= item.product.productImage[0] %>" alt="">
+                                </a>
+                            </td>
+                            <td><%= item.product.productName %></td>
+                            <td><%= item.product.category.name %></td>
+                            <td>₹<%= item.product.regularPrice %></td>
+                            <td><%= item.quantity %></td>
+                            <td>₹<%= (item.product.regularPrice * item.quantity).toFixed(2) %></td>
+                            <td><%= item.status  %></td>
+                            <td>
+                                <div class="container">
+                                    <div class="row">
+                                        <td>
+                                    <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200 statusSelect" style="padding-left: 8px; margin-left: -95px;" 
+                                    onchange="handleStatusChange('<%= order._id %>','<%= item.product._id %>', this)" id="statusSelect-<%= item.product._id %>">
+                                        <% if (item.status === 'Pending') { %>
+                                            <option value="Pending" <%= item.status === 'Pending' ? 'selected' : '' %> >Pending</option>
+                                            <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
+                                            <option value="Delivered" disabled >Delivered</option>
+                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                                        <% } else if(item.status === 'Shipped') { %>
+                                            <option value="Pending" disabled >Pending</option>
+                                            <option value="Shipped" <%= item.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                            <option value="Delivered" <%= item.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                                        <% } else if(item.status === 'Delivered') { %>
+                                            <option value="Pending" disabled >Pending</option>
+                                            <option value="Shipped" disabled >Shipped</option>
+                                            <option value="Delivered" >Delivered</option>
+                                            <option value="Cancelled" disabled >Cancelled</option>
+                                        <% } else if(item.status === 'Cancelled') { %>
+                                            <option value="Pending" disabled >Pending</option>
+                                            <option value="Shipped" disabled >Shipped</option>
+                                            <option value="Delivered" >Delivered</option>
+                                            <option value="Cancelled" <%= item.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                                        <% } else if(item.status == 'Returned') { %>
+                                            <option value="Returned" >Returned</option>
+                                        <% } %>
+                                    </select></td> </div></div>
+                                                       </td>
+                        
+                        </tr>
+                    <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+            <div class="pt-2 d-flex justify-content-between">
+                <a class="btn btn-outline-dark rounded-0" href="/orders">Back to orders</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4 payment-details mt-4 mt-md-0">
+        <h5><u>Payment Details</u></h5>
+        <p>Total Amount: ₹<%= (order.totalprice + order.discountAmount).toFixed(2) %></p>
+        <p>Discount: ₹<%= order.discountAmount.toFixed(2) %></p>
+        <p>Final Amount: ₹<%= order.totalprice.toFixed(2) %></p>
+        <p>Payment Method: <%= order.paymentMethod %></p>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+          function handleStatusChange(orderId, productId, selectElement) {
+            const selectedStatus = selectElement.value;
+                      
+            if (selectedStatus === 'Cancelled' || selectedStatus === 'Returned') {
+                selectElement.disabled = true;
+            }
+    
+            fetch('/updateStatus', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ orderId, productId, selectedStatus })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update status');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Status updated successfully:', data);
+                if (data && data.updatedOrder) {
+                    const orderStatusElement = document.getElementById('status-' + productId);
+                    window.location.reload()
+                    if (orderStatusElement) {
+                        orderStatusElement.textContent = data.updatedOrder.status;
+                        document.getElementById('reloadButton').click();
+                    }
+                } else {
+                    console.error('Error: Updated order data is missing or invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+            });
+        }
+</script>
+
+<%- include ('../partials/adminfooter') %>

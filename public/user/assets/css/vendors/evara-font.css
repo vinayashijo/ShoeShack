@@ -1,0 +1,50 @@
+@font-face {
+    font-family: "ShoeShack-font";
+    src: url("../../fonts/ShoeShack-font/ShoeShack-font57b6.ttf?5ff2f70882bedebb09d812961feeb5e7") format("truetype"),
+        url("../../fonts/ShoeShack-font/ShoeShack-font57b6.woff?5ff2f70882bedebb09d812961feeb5e7") format("woff"),
+        url("../../fonts/ShoeShack-font/ShoeShack-font57b6.woff2?5ff2f70882bedebb09d812961feeb5e7") format("woff2"),
+        url("../../fonts/ShoeShack-font/ShoeShack-font57b6.eot?5ff2f70882bedebb09d812961feeb5e7#iefix") format("embedded-opentype"),
+        url("../../fonts/ShoeShack-font/ShoeShack-font57b6.svg?5ff2f70882bedebb09d812961feeb5e7#ShoeShack-font") format("svg");
+}
+
+i[class^="ShoeShack-font-"]:before, i[class*=" ShoeShack-font-"]:before {
+    font-family: ShoeShack-font !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.ShoeShack-font-cpu:before {
+    content: "\f101";
+}
+.ShoeShack-font-desktop:before {
+    content: "\f102";
+}
+.ShoeShack-font-diamond:before {
+    content: "\f103";
+}
+.ShoeShack-font-dress:before {
+    content: "\f104";
+}
+.ShoeShack-font-high-heels:before {
+    content: "\f105";
+}
+.ShoeShack-font-home:before {
+    content: "\f106";
+}
+.ShoeShack-font-kite:before {
+    content: "\f107";
+}
+.ShoeShack-font-smartphone:before {
+    content: "\f108";
+}
+.ShoeShack-font-teddy-bear:before {
+    content: "\f109";
+}
+.ShoeShack-font-tshirt:before {
+    content: "\f10a";
+}

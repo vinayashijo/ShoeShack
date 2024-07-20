@@ -1,0 +1,230 @@
+<%- include ('../partials/adminheader') %>
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script> -->
+
+<section class="content-main">
+    <div class="content-header">
+        
+<% var now = Date.now() %>
+        <div>
+            <h2 class="content-title card-title">Coupons </h2>
+        </div>
+        <div class="d-grid">
+            <a href="/addcoupon" class="btn btn-primary">Add Coupons</a>
+        </div>
+        
+    </div>
+    <div class="card mb-4">
+       
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-12">
+                    <form action="/coupons" class="d-flex">
+                        <div class="form-group me-2">
+                            <select class="form-control" name="sortData">
+                                <option value="name">Name</option>
+                                <option value="startingDate">Starting Date</option>
+                                <option value="expiryDate">Expiry Date</option>
+                                <option value="minimumAmount">Minimum Amount</option>
+                            </select>
+                        </div>
+                        <div class="form-group me-2">
+                            <select class="form-control" name="sortOrder">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary me-2">Sort</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="card-body">
+
+            <div style="max-width: unset;" class=" col-3 col-sm-6 grid-margin">
+                <div class="form-group col-12 col-sm-6 mr-1">
+                  <form action="/coupons">
+                  <div class="input-group">
+                    <input type="text" class="form-control mb-2" value="" name="search" placeholder="Search here..." aria-label="Recipient's username" aria-describedby="basic-addon2">
+                  </div>
+                  </form>
+                </div>
+              </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="col-1" >Name</th>
+                            <th class="col-1"  >Description</th>
+                            <th class="col-2" >Start Date</th>
+                            <th class="col-2" >Expiry Date</th>
+                            <th class="col-2" >Min. Amt</th>
+                            <th class="col-2" >Type</th>
+                            <th scope="col">Discount</th>
+                            <th scope="col">Max. Discount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Edit</th>
+                            <th  scope="col"> List/Unlist </th>
+                            <th  scope="col"> Action </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if( coupons && coupons.length > 0 ){ %>
+                            <% for ( let coupon of coupons ) { %>
+                                <% if( coupon.startingDate < now && coupon.expiryDate > now && coupon.status ) { var active = "Active" } else if( coupon.startingDate > now && coupon.status ) { var active = "Upcoming"} else if( coupon.expiryDate < now && coupon.status ) { var active = "Expired"} %>
+                        <tr >
+                            <td><%= coupon.name %></td>
+                            <td><%= coupon.description %></td>
+                            <td><%= moment(coupon.startingDate).format(shortDateFormat) %></td>    
+                            <td><%= moment(coupon.expiryDate).format(shortDateFormat) %></td>    
+                            <td><%= coupon.minimumAmount %></td>
+                            <td><%= coupon.discountType %></td>
+                            <td><%= coupon.discount %></td>
+                            <td><%= coupon.maxDiscount %></td>
+                            <td><%= coupon.status %></td>
+                            <td>
+                                <a href="/editcoupon?id=<%= coupon._id %>">
+                                    <i class="fas fa-pencil-alt"></i> Edit
+                                </a>
+                                
+                            </td>
+                            <td>
+                                <% if (coupon.status===true) { %>
+                                    <span class="badge rounded-pill alert-success">Listed</span>
+                                <% } else { %>
+                                    <span class="badge rounded-pill alert-danger">Unlisted</span>
+                                <% } %>
+                            </td>
+                            <td >
+                                <% if (coupon.status === true) { %>
+                                    <button type="button" class="btn btn-sm font-sm rounded" style="width: 70px; background-color: rgb(255, 0, 0); color: white;" onclick="blockOrUnblockCoupon('<%= coupon._id %>','list')">UnList</button>
+
+                                <% } else { %>
+                                    <button type="button" class="btn btn-sm font-sm rounded " style="width: 70px; background-color: rgb(15, 193, 15);" onclick="blockOrUnblockCoupon('<%= coupon._id %>','Unlist')">List</button>
+                                <% } %>
+                                        
+                            </td>
+                        </tr>
+                        <% } %>
+                           <% } %>
+                    </tbody>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+     
+</section> <!-- content-main end// -->
+
+<script>
+    async function cancelCoupon( couponId ){
+        const cancelbtn = document.getElementById(`cancel-${couponId}`)
+        const status=document.getElementById("status")
+       
+        console.log(clicked)
+        try {
+            const response = await axios.patch('/cancelcoupon',{ couponId })
+          
+            if ( response.data.cancelled ) {
+               
+                status.innerHTML="Cancelled"
+                cancelbtn.innerHTML = 'Active'
+                cancelbtn.style.color = '#00FF00' 
+            }
+            window.location.reload();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function blockOrUnblockCoupon(couponId, clicked) {
+    let confirmationMessage;
+
+    if (clicked === 'Unlist') {
+        confirmationMessage = "Are you sure you want to List this Coupon?";
+    } else {
+        confirmationMessage = "Are you sure you want to Unlist this Coupon?";
+    }
+
+    Swal.fire({ 
+        text: confirmationMessage,
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/couponunlist?id=${couponId}`,
+                method: 'PATCH',
+                contentType: 'application/json',
+                success: function (response) {
+                    if (response.success) {
+                        let successMessage = clicked === 'Unlist' ? 'Coupon Listed!' : 'Coupon UnListed!';
+                        Swal.fire({
+                            icon: 'success',
+                            text: successMessage
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        console.error('Blocking/Unblocking failed');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Ajax error:', error);
+                }
+            });
+        }
+    });
+}
+
+    
+//     function blockOrUnblockCoupon(couponId, clicked) {
+//         let confirmationMessage;
+     
+//         if (clicked === 'Unlist') {
+//             confirmationMessage = "Are you sure you want to Block this Coupon?";
+//         } else {
+//             confirmationMessage = "Are you sure you want to UnBlock this Coupon?";
+//         }
+
+//         swal({
+//             text: confirmationMessage,
+//             buttons: ["cancel", true],
+//         }).then((result) => {
+//             if (result === true) {
+//                 $.ajax({
+//                     url: `/couponunlist?id=${couponId}`,
+//                     method: 'PATCH',
+//                     contentType: 'application/json',
+//                     success: function (response) {
+//                         if (response.success) {
+//                             if (clicked === 'Unlist') {
+//                                 swal("Coupon Unlisted!", {
+//                                     icon: "success",
+//                                 }).then(() => {
+//                                     location.reload();
+//                                 });
+//                             } else {
+//                                 swal("Coupon Listed!", {
+//                                     icon: "success",
+//                                 }).then(() => {
+//                                     location.reload();
+//                                 });
+//                             }
+//                         } else {
+//                             console.error('Blocking/Unblocking failed');
+//                         }
+//                     },
+//                     error: function (xhr, status, error) {
+//                         console.error('Ajax error:', error);
+//                     }
+//                 });
+//             }
+// });
+// }
+
+
+</script>
+
+<%- include ('../partials/adminfooter') %>

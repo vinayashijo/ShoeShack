@@ -1,0 +1,260 @@
+<%- include ('../partials/adminHeader') %>
+<main>
+<section class="content-main" style="background-color: white;">
+  <div class="content-header">
+      <div>
+          <h2 class="content-title card-title">Edit Product</h2>
+          
+          <span class="text-center w-50 mx-auto" style=" display: block;  color: rgb(23, 200, 14);" id="errormessage"></span>
+         
+      </div>
+  </div>
+  <div class="card mb-4">
+      <div class="card-body">
+          <div class="card-body">
+            <form method="post" action="/updateproduct/<%= data[0]._id %>"  id="productform" onsubmit="return validateForm()" enctype="multipart/form-data" multiple>  
+                  <div class="col-lg-4 mb-4">
+                      <label for="product_name" class="form-label">Product Name</label>
+                      <input type="text" placeholder="typehere" value="<%=data[0].productName %>" name="productName" class="form-control border" id="productnameX">
+                      <div id="productName-error" class="error-message"></div>
+                  </div>
+                  <div class="col-lg-4 mb-4">
+                      <label class="form-label">Brand Name</label>
+                      <input type="text" placeholder="Type here" value="<%=data[0].brand %>" name="brandName" class="form-control border" id="brandnameX">
+                      <div id="brandName-error" class="error-message"></div>
+                  </div>
+                  <div class="mb-4">
+                      <label class="form-label">Full description</label>
+                      <textarea placeholder="Type here"  name="description"  id="descriptionX" class="form-control border" rows="4"><%=data[0].description %></textarea>
+                      <div id="description-error" class="error-message"></div>
+                  </div>
+                  <div class="row">
+                      <div class="col-lg-4">
+                          <div class="mb-4">
+                              <label class="form-label">Regular price</label>
+                              <input placeholder="$" value="<%=data[0].oldPrice %>" id="oldPriceX"  name="oldPrice" type="text" class="form-control border">
+                              <div id="oldPrice-error" class="error-message"></div>
+              
+                          </div>
+                      </div>
+                      <div class="col-lg-4">
+                          <div class="mb-4">
+                              <label class="form-label">Discount</label>
+                              <div class="input-group">
+                                  <input placeholder="$" value="<%=data[0].discount %>" id="discountX" name="discount" type="text" class="form-control border">
+                                  <div class="input-group-append">
+                                      <span class="input-group-text" style="background-color: #fff; border: none; border-left: 1px solid #ced4da;">%</span>
+                                  </div>
+                              </div>
+                              <div id="discount-error" class="error-message"></div>
+                          </div>
+                          
+                      </div>
+                      <div class="col-lg-4">
+                          
+                      </div>
+                  </div>
+
+
+                  <div class="row">
+                    <div class="col-lg-4">
+                        <div class="mb-4">
+                            <label class="form-label">Stock</label>
+                            <!-- Ensure the value attribute is fetching the stock information correctly from your data object -->
+                            <input placeholder="Enter total stock quantity" value="<%= data[0].stock %>" id="stockQuantity" name="stock" type="text" class="form-control border">
+                            <div id="stock-error" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                  <div class="row">
+                      <div class="col-lg-4 offset-lg-4"> 
+                          <div id="sumquantity-error" class="error-message"></div>
+                      </div>
+                  </div>
+                  <div class="card mb-4">
+                      <div class="card-body">
+                          <div class="row gx-2">
+                            <div class="col-sm-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <!-- <label class="form-label">Selected Category: <%= data[0].category %></label> -->
+                                <select class="form-select border" style="width: 150px;" name="category">
+                                    <% for (let i = 0; i < cat.length; i++) {
+                                        let catId = cat[i]._id.toString().trim();
+                                        let dataCategory = data[0].category.toString().trim();
+                                    %>
+                                        <!-- <label class="form-label">Cat ID: <%= catId %> | Data Category: <%= dataCategory %></label> -->
+                                        <option value="<%= catId %>" <%= catId === dataCategory ? 'selected' : '' %>>
+                                            <%= cat[i].name %>
+                                        </option>
+                                    <% } %>
+                                </select>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-----CHANGE IMAGES-->
+
+                  <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Choose Images</h4>
+                        </div>
+                        <div id="addedImagesContainer" class="col-md-6" style="display: flex;">
+                            <% for (let i = 0; i < data[0].productImage.length; i++) { %>
+                                <div class="mb-4" style="display: inline-block;">
+                                    <img class="rounded" style="width: 50px; height: 60px;" src="/public/photos/<%= data[0].productImage[i] %>" alt="image" data-filename="<%= data[0].productImage[i] %>" id="imgCount">
+                                    <span class="delete-icon" onclick="deleteImage('<%= data[0]._id %>', '<%= data[0].productImage[i] %>')">❌</span>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="input-upload">
+                                <img src="assets/imgs/theme/upload.svg" alt="">
+                                <input class="form-control" name="images" id="imageInput" type="file" multiple>
+                                <div id="image-error" class="error-message"></div>
+                            </div>
+                        </div>
+                      </div>
+                      <div>
+                        <button class="btn btn-md rounded font-sm " id="updatebtn" type="submit" style="background-color: rgb(0, 153, 255);">Update</button>
+                    </div>
+              </form>
+
+</script>
+      
+      </div> <!-- card-body end// -->     
+  </div> <!-- card end// -->
+</section> <!-- content-main end// -->
+
+<footer class="main-footer font-xs">
+  <div class="row pb-30 pt-15">
+      <div class="col-sm-6">
+          <script>
+          document.write(new Date().getFullYear())
+          </script> ©, ShoeShack - HTML Ecommerce Template .
+      </div>
+      <div class="col-sm-6">
+          <div class="text-sm-end">
+              All rights reserved
+          </div>
+      </div>
+  </div>
+</footer>
+</main>
+<script src="/public/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
+<script src="/public/admin/assets/js/vendors/bootstrap.bundle.min.js"></script>
+<script src="/public/admin/assets/js/vendors/select2.min.js"></script>
+<script src="/public/admin/assets/js/vendors/perfect-scrollbar.js"></script>
+<script src="/public/admin/assets/js/vendors/jquery.fullscreen.min.js"></script>
+<script src="/public/admin/assets/js/vendors/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<!-- Main Script -->
+<script src="/public/admin/assets/js/main.js" type="text/javascript"></script>
+<script src="/public/admin/assets/js/custom-chart.js" type="text/javascript"></script>
+
+<script>
+
+function validateForm() {
+    resetErrorMessages();
+
+    let isValid = true;
+    const productname = document.getElementById("productnameX").value.trim();
+    const description = document.getElementById("descriptionX").value.trim();
+    const brand = document.getElementById("brandnameX").value.trim();
+    const oldPrice = parseFloat(document.getElementById("oldPriceX").value);
+    const discount = parseFloat(document.getElementById("discountX").value);
+    const stock = parseFloat(document.getElementById("stockQuantity").value);
+
+    if (productname === "" ) {
+        displayErrorMessage("productName-error", "Product Name is required");
+        isValid = false;
+    }
+
+    if (description === "") {
+        displayErrorMessage("description-error", "Description is required");
+        isValid = false;
+    }
+
+    if (brand === "") {
+        displayErrorMessage("brandName-error", "Brandname is required");
+        isValid = false;
+    }
+
+    if ( oldPrice <= 0) {
+        displayErrorMessage("oldPrice-error", "Regular price must be a valid positive number");
+        isValid = false;
+    }else if (isNaN(oldPrice)) {
+        displayErrorMessage("oldPrice-error", "Regular price must be in number");
+        isValid = false;
+    }
+
+     if (isNaN(discount) ) {
+        displayErrorMessage("discount-error", "discount must be in numbers");
+        isValid = false;
+    }else if (discount <= 0 ) {
+        displayErrorMessage("discount-error", "discount must be a valid positive number");
+        isValid = false;
+    }else if(discount >=100){
+        displayErrorMessage("discount-error", "discount must be lessthan 100 ");
+        isValid = false;
+    }
+
+    if (stock < 0) {
+    displayErrorMessage("stock-error", "Stock must be a valid positive number");
+    isValid = false;
+    } else if (isNaN(stock)) {
+    displayErrorMessage("stock-error", "Stock must be in numbers");
+    isValid = false;
+}
+
+    return isValid;
+}
+
+function displayErrorMessage(elementId, message) {
+  var errorElement = document.getElementById(elementId);
+  errorElement.innerText = message;
+  errorElement.style.display = "block";
+  errorElement.style.color = "red";
+}
+    
+function resetErrorMessages() {
+ var errorElements = document.querySelectorAll(".error-message");
+ errorElements.forEach(function (element) {
+ element.innerText = "";
+ element.style.display = "none";
+ });
+}
+
+
+function deleteImage(productId, imageName) {
+  if (confirm('Are you sure you want to delete this image?')) {
+    $.ajax({
+      url: '/delete-image', 
+      method: 'POST',
+      data: { productId: productId, imageName: imageName },
+      success: function(response) {
+        if (response.success) {
+          
+          $(`img[src="/public/photos/${imageName}"]`).parent().remove();
+        } else {
+          alert('Error deleting image');
+        }
+      },
+      error: function(error) {
+        console.error('Error deleting image:', error);
+        alert('Error deleting image');
+      }
+    });
+  }
+}
+
+
+</script>
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/ShoeShack/ShoeShack-backend/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:32:57 GMT -->
+</html>

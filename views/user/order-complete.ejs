@@ -1,0 +1,199 @@
+<%- include('../partials/userheader') %>
+<% if(order.paymentMethod === 'Razorpay' && order.paymentStatus === "Failed") { %> 
+<div class="container d-flex justify-content-center align-items-center ">
+    <div class="text-center">
+        <img width="64" height="64" src="https://img.icons8.com/external-flaticons-flat-flat-icons/64/external-failure-working-stress-flaticons-flat-flat-icons-2.png" alt="external-failure-working-stress-flaticons-flat-flat-icons-2"/>
+        <h1 class="mb-4 text-success text-muted" role="alert">Payment FAILED !!!</h1>
+        <p class="text-center">Your order has not been completed due to technical issues !</p>
+        <p class="text-center"> You can retry payment from order page!</p>
+        <div>
+            <a href="/getprofile#orders"><button type="button" class="btn btn-primary mx-2">Retry Payment</button></a>
+        </div>
+    </div>
+</div>
+<% } else { %> 
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="text-center">
+            <img width="88" height="88" src="https://img.icons8.com/color/48/ok--v1.png" alt="ok--v1"/>
+            <h1 class="mb-4 text-success text-muted" role="alert">Order Successfully Placed</h1>
+            <h1 class="mb-4 text-success text-muted" role="alert">OrderId: <a class="text-primary"><%= order.trackingId %></a></h1>
+            <div>
+                <button class="btn btn-primary mx-2" id="btnDownload" data-order='<%= JSON.stringify(order) %>'>Download Invoice</button>
+                <a href="/getprofile#orders"><button type="button" class="btn btn-secondary mx-2">View Orders</button></a>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<%- include('../partials/userfooter') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {    
+    document.getElementById('btnDownload').addEventListener('click', function() {
+        
+        const order = JSON.parse(this.getAttribute('data-order'));   //check in the button there is an attribute - data-order which has data i linked to 
+        console.log("Order Data:", order); 
+        
+        const { jsPDF } = window.jspdf;
+        // Initialize jsPDF correctly
+        const doc = new jsPDF();
+        let yPos = 20;
+        // Title
+        doc.setFontSize(20);
+        doc.text('INVOICE', 110, yPos, null, null, 'center');
+        yPos += 5;
+        doc.setFontSize(16);
+        doc.text('Shoe Shack',10,yPos);
+        yPos +=5;
+        doc.setFontSize(12);
+        doc.text('32ARWPV6357N1ZN',10,yPos);
+        yPos +=5;
+        doc.text('Kochi',10,yPos);
+        yPos+=15
+        // Order details
+        doc.setFontSize(12);
+        if (order) {
+            doc.text('Order ID: ' + order.trackingId , 10, yPos);
+            // yPos += 5;
+            doc.text('Date: ' + new Date().toLocaleDateString(), 170, yPos);
+          
+
+               // Shipping address
+            yPos += 15;
+            doc.setFontSize(16);   
+            doc.text('Shipping Address:', 10, yPos);
+            yPos += 10;
+            doc.setFontSize(12); 
+
+            if (order.billingdetails) {
+                const name = order.billingdetails.name ;
+                doc.text(name, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.houseName, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.cityOrTown, 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.district + ', ' + order.billingdetails.state  + ', ' + order.billingdetails.pincode.toString(), 10, yPos);
+                yPos += 5;
+                doc.text(order.billingdetails.country, 10, yPos);
+                yPos += 10;
+            }
+            // Products table
+            if (order.items && order.items.length > 0) {
+                const bodyData = order.items.map(item =>
+                 { return [item.product.productName,  item.product.brand, item.product?.category?.name, item.price, item.quantity,(item.price * item.quantity)] });
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Product','Brand', 'Category', 'Price','Quantity', 'SubTotal']],
+                    body: bodyData,
+                    theme: 'grid',
+                    styles: { halign: 'center' },
+                });
+
+                yPos = doc.previousAutoTable.finalY + 10;
+            }
+            // Total price and discount
+            yPos += 10;
+            // Payment details
+            doc.text('SubTotal:           ' + (order.totalprice),150, yPos);
+            yPos += 5;
+
+            doc.text('GST:              ' + (order.totalprice*.05).toFixed(2), 150, yPos);
+            yPos += 5;
+
+            doc.text('Coupon Discount: ' + (order.discountAmount || '0.00'), 150, yPos);
+            yPos += 5;
+
+            doc.text('Delivery Charges: ' +  '0.00', 150, yPos);
+            yPos += 5;
+
+            doc.text('Extra Discount:   ' + (-(order.totalprice*.05).toFixed(2)  || '0.00') , 150, yPos);
+            yPos += 10;
+
+            doc.text('Total : ' + (order.totalprice || '0.00'), 150, yPos);
+            yPos += 5;
+        }
+        doc.save('invoice.pdf');
+    });
+});
+
+//         const order = JSON.parse(this.getAttribute('data-order'));
+//         console.log("Order Data:", order); // Log the order object for debugging
+
+//         const { jsPDF } = window.jspdf;
+//         const doc = new jsPDF();
+//         let yPos = 20;
+//         // Title
+//         doc.setFontSize(20);
+//         doc.text('INVOICE', 105, yPos, null, null, 'center');
+//         yPos += 5;
+//         doc.setFontSize(16);
+//         doc.text('Organic Life', 10, yPos);
+//         yPos += 5;
+//         doc.setFontSize(12);
+//         doc.text('32ARWPV6357N1ZN', 10, yPos);
+//         yPos += 5;
+//         doc.text('Kochi', 10, yPos);
+//         yPos += 10;
+//         // Order details
+//         doc.setFontSize(12);
+//         if (order) {
+//             doc.text('Order ID: ' + order._id, 10, yPos);
+//             yPos += 10;
+//             doc.text('Date: ' + new Date().toLocaleDateString(), 10, yPos);
+//             yPos += 10;
+//             // Shipping address
+//             doc.setFontSize(16);
+//             doc.text('Shipping Address:', 10, yPos);
+//             yPos += 10;
+//             doc.setFontSize(12);
+//             if (order.address) {
+//                 const name = order.address.firstName + ' ' + order.address.lastName;
+//                 doc.text(name, 10, yPos);
+//                 yPos += 5;
+//                 doc.text(order.address.house, 10, yPos);
+//                 yPos += 5;
+//                 doc.text(order.address.street, 10, yPos);
+//                 yPos += 5;
+//                 doc.text(order.address.place + ', ' + order.address.state + ' - ' + order.address.pincode, 10, yPos);
+//                 yPos += 5;
+//                 doc.text(order.address.country, 10, yPos);
+//                 yPos += 10;
+//             }
+//             // Products table
+//             if (order.items && order.items.length > 0) {
+//                 const bodyData = order.items.map(item => [item.product.productName, item.size, item.quantity, item.price, item.total]);
+//                 doc.autoTable({
+//                     startY: yPos,
+//                     head: [['Product', 'Size', 'Quantity', 'Price', 'SubTotal']],
+//                     body: bodyData,
+//                     theme: 'grid',
+//                     styles: { halign: 'center' },
+//                 });
+//                 yPos = doc.previousAutoTable.finalY + 10;
+//             }
+//             // Total price and discount
+//             yPos += 10;
+//             // Payment details
+//             doc.text('SubTotal: ' + order.grandTotal, 130, yPos);
+//             yPos += 10;
+//             doc.text('GST: ' + (order.grandTotal * 0.05), 130, yPos);
+//             yPos += 10;
+//             doc.text('Coupon Discount: ' + (order.couponDiscount || '0'), 130, yPos);
+//             yPos += 10;
+//             doc.text('Delivery Charges: ' + '0', 130, yPos);
+//             yPos += 10;
+//             doc.text('Discount: ' + (order.totalDiscount || '0'), 130, yPos);
+//             yPos += 10;
+//             doc.text('Total: ' + (order.totalprice || '0'), 130, yPos);
+//             yPos += 10;
+//         }
+//         doc.save('invoice.pdf');
+//     });
+// });
+
+
+</script>

@@ -1,0 +1,523 @@
+<%- include('../partials/userheader') %>
+
+<style>
+    .coupon-form {
+        display: flex;
+        align-items: center;
+    }
+
+    .coupon-input-container {
+        display: flex;
+        width: 100%;
+    }
+
+    #coupon-input {
+        flex: 1;
+        margin-right: 10px; /* Adjust the spacing between input and button */
+    }
+
+    #apply {
+        white-space: nowrap;
+    }
+</style>
+
+
+<!-- Coupon modal -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<!-- Discount Modal -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const couponForm = document.getElementById('coupon-form');
+
+
+async function applyCoupon(event) {
+   
+    event.preventDefault();
+    const couponminimum=document.getElementById('cou')
+    const totalCartPrice = document.getElementById('total');
+    const couponDiscount = document.getElementById('coupon-discount');
+    let total = parseFloat(totalCartPrice.textContent.replace('₹', ''));
+    const couponCode = document.getElementById('coupon-input').value.trim();
+    const invalidRegex = /[ .]/;
+
+    if (invalidRegex.test(couponCode) || couponCode === "") {
+        alert('Enter a valid Coupon name');
+        return;
+    }
+
+    const response = await axios.post('/applycoupon', { couponCode, total });
+
+    if (response.data.success) {
+        const couponMessage = document.getElementById('coupon-message');
+        couponMessage.innerHTML = '<p>*Coupon applied</p>';
+        // Hide the apply button and show the cancel button
+        document.getElementById('apply').style.display = 'none';
+        document.getElementById('cancel').style.display = 'block';
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Coupon Applied',
+            text: 'Your coupon has been applied successfully!',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+            }
+        });
+     
+        if (response.data.discounted) {
+            totalCartPrice.innerHTML = `₹ ${response.data.discounted.discountedTotal}`;
+            couponDiscount.innerHTML = `-₹ ${response.data.discounted.discountAmount}`;
+        }
+        if(response.data.coupona){
+            couponminimum.innerHTML=`${response.data.coupon}`
+        }
+    } 
+    else {
+        
+        const couponMessage = document.getElementById('coupon-message');
+        couponMessage.innerHTML = `<p class="text-danger">${response.data.message}</p>`;
+    }
+}
+
+async function cancelCoupon(event) {
+    event.preventDefault();
+    
+    const confirmCancel = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it!'
+    });
+
+
+    if (confirmCancel.isConfirmed) {
+        const response = await axios.get('/cancelCoupon');
+        window.location.reload();
+
+        if (response.data.success) {
+            const couponMessage = document.getElementById('coupon-message');
+            couponMessage.innerHTML = `<p>${response.data.message}</p>`;
+        }
+    }
+}
+
+function showProductDetails(productId) {
+        window.location.href = '/productdetails/' + productId;
+        return false; // Prevent any default action
+    }
+
+    async function addToCart(productId, stock, price, discount) {
+        try {
+            const response = await axios.post('/addtocart', { productId, stock, price, discount });
+            console.log("axios - /addtocart")
+
+            if (!response.data.login) {
+                window.location.href = '/userlogin';
+                return;
+            }
+
+            if (response.data.newItem === true) {
+                Swal.fire({
+                    title: 'Product Added to Cart',
+                    text: 'The selected product has been added to your cart.',
+                    icon: 'success',
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'OK'
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was an issue adding the product to your cart.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+
+    function updateQuantity(productId, stock, action, event) {
+        event.preventDefault();
+
+        const qtyControls = event.target.closest('.detail-qty');
+        const qtyDownBtn = qtyControls.querySelector('.qty-down');
+        const qtyUpBtn = qtyControls.querySelector('.qty-up');
+        const qtyValElem = qtyControls.querySelector('.qty-val');
+
+        qtyDownBtn.disabled = true;
+        qtyUpBtn.disabled = true;
+
+        const currentQuantity = parseInt(qtyValElem.textContent);
+        const newQuantity = currentQuantity + action;
+
+        if (newQuantity < 1) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Quantity cannot be less than 1',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+            qtyDownBtn.disabled = false;
+            qtyUpBtn.disabled = false;
+            return;
+        }
+
+        if (newQuantity > Math.min(stock, 5)) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Quantity cannot exceed ' + Math.min(stock, 5),
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    qtyValElem.textContent = Math.min(stock, 5);
+                }
+            });
+            qtyDownBtn.disabled = false;
+            qtyUpBtn.disabled = false;
+            return;
+        }
+
+        fetch('/updatequantity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                qtyValElem.textContent = newQuantity;
+                const priceElem = qtyControls.closest('tr').querySelector('.price span');
+
+                const subtotalElem = qtyControls.closest('tr').querySelector('.text-right span');
+                const price = parseFloat(priceElem.textContent.replace('₹', ''));
+
+                subtotalElem.textContent = '₹' + (price * newQuantity).toFixed(2);
+                const subtotalPriceElem = document.getElementById('subtotal');
+
+                const totalPriceElem = document.getElementById('total');
+           
+                if (subtotalPriceElem)
+                {
+                    let subtotalPrice = parseFloat(subtotalPriceElem.textContent.replace('₹', ''));
+                    subtotalPrice += price * action;
+                    subtotalPriceElem.textContent = '₹' + subtotalPrice.toFixed(2);
+                }
+
+                if (totalPriceElem ) {
+                    
+                    let totalPrice = parseFloat(totalPriceElem.textContent.replace('₹', ''));
+                    totalPrice += price * action;
+                    totalPriceElem.textContent = '₹' + totalPrice.toFixed(2);
+                }
+
+                console.log("Quantity updated successfully in the UI");
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error updating quantity:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was an issue updating the quantity.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        })
+        .finally(() => {
+            qtyDownBtn.disabled = false;
+            qtyUpBtn.disabled = false;
+        });
+    }
+
+    async function deCart(productId) {
+        try {
+            const swalalert = await Swal.fire({
+                title: 'Remove Product?',
+                text: "Do you want to remove this product from your cart?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, keep it'
+            });
+
+            if (swalalert.isConfirmed) {
+                const response = await fetch('/deCart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId }),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                    // const updatedCartResponse = await fetch('/getcart');
+                    // const updatedCartData = await updatedCartResponse.json();
+                    // updateCartDOM(updatedCartData);
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error removing product from cart:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'There was an issue when removing the product from your cart.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK',
+            });
+        }
+    }
+
+    function updateCartDOM(cartData) {
+        const cartItemsContainer = document.querySelector('.shopping-summery tbody');
+        cartItemsContainer.innerHTML = ''; // Clear current items
+
+        cartData.items.forEach(item => {
+            const itemRow = `
+                <tr>
+                    <td class="image product-thumbnail">
+                        <img src="/public/photos/${item.productId.productImage[0]}" alt="#" onclick="return showProductDetails('${item.productId._id}');">
+                    </td>
+                    <td class="product-des product-name">
+                        <h5 class="product-name">
+                            <a href="/productdetails/${item.productId._id}">${item.productId.name}</a>
+                        </h5>
+                        <p class="font-xs">${item.productId.description}</p>
+                    </td>
+                    <td class="price" data-title="Price"><span>₹${item.price.toFixed(2)}</span></td>
+                     <td class="price" data-title="Price"><span>₹${item.productId.stock }</span></td>
+                    <td class="text-center" data-title="Stock">
+                        <div class="detail-qty border radius m-auto">
+                            <a href="#" class="qty-down" onclick="updateQuantity('${item.productId._id}', ${item.productId.stock}, -1, event)">
+                                <i class="fi-rs-angle-small-down"></i></a>
+                            <span class="qty-val">${item.quantity}</span>
+                            <a href="#" class="qty-up" onclick="updateQuantity('${item.productId._id}', ${item.productId.stock}, 1, event)">
+                                <i class="fi-rs-angle-small-up"></i></a>
+                        </div>
+                    </td>
+                    <td class="text-right" data-title="Cart">
+                        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                    </td>
+                    <td class="action" data-title="Remove">
+                        <a href="#" class="text-muted" onclick="deCart('${item.productId._id}')"><i class="fi-rs-trash"></i></a>
+                    </td>
+                </tr>
+            `;
+            cartItemsContainer.insertAdjacentHTML('beforeend', itemRow);
+        });
+
+        // const subtotalPriceElem = document.querySelector('.cart_subtotal_amount');
+        const subtotalPriceElem = document.querySelector('.subtotal');
+        alert(subtotalPriceElem)
+
+        const totalPriceElem = document.querySelector('.total');
+        alert(totalPriceElem)
+
+        subtotalPriceElem.textContent = '₹' + cartData.totalPrice.toFixed(2);
+        totalPriceElem.textContent = '₹' + cartData.totalPrice.toFixed(2);
+      
+    }
+</script>
+
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Your Cart
+            </div>
+        </div>
+    </div>
+    
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table shopping-summery text-center clean">
+                            <thead>
+                                <tr class="main-heading">
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Stock</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Subtotal</th>
+                                    <th scope="col">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(let i=0; i<cart.items.length; i++){ %>
+                                    <tr>
+                                        <td class="image product-thumbnail">
+                                            <img src="/public/photos/<%= cart.items[i].productId.productImage[0] %>" alt="#" onclick="return showProductDetails('<%= cart.items[i].productId._id %>');">
+                                        </td>
+                                        <td class="product-des product-name">
+                                            <h5 class="product-name">
+                                                <a href="/productdetails/<%= cart.items[i].productId._id %>"><%= cart.items[i].productId.name %></a>
+                                            </h5>
+                                            <p class="font-xs"><%= cart.items[i].productId.description %></p>
+                                        </td>
+                                        <td class="price" data-title="Price"><span>₹<%= cart.items[i].price.toFixed(2) %></span></td>
+                                        <td class="stock" data-title="Stock"><span><%= cart.items[i].productId.stock %></span></td>
+                                        <td class="text-center" data-title="Stock">
+                                            <div class="detail-qty border radius m-auto">
+                                                <a href="#" class="qty-down" onclick="updateQuantity('<%= cart.items[i].productId._id %>', '<%= cart.items[i].productId.stock %>', -1, event)">
+                                                    <i class="fi-rs-angle-small-down"></i></a>
+                                                <span class="qty-val"><%= cart.items[i].quantity %></span>
+                                                <a href="#" class="qty-up" onclick="updateQuantity('<%= cart.items[i].productId._id %>', '<%= cart.items[i].productId.stock %>', 1, event)">
+                                                    <i class="fi-rs-angle-small-up"></i></a>
+                                            </div>
+                                        </td>
+                                        <td class="text-right" data-title="Cart">
+                                            <span>₹<%= (cart.items[i].price * cart.items[i].quantity).toFixed(2) %></span>
+                                        </td>
+                                        <td class="action" data-title="Remove">
+                                            <a href="#" class="text-muted" onclick="deCart('<%= cart.items[i].productId._id %>')"><i class="fi-rs-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="cart-action">
+                        <a class="btn mr-10 mb-sm-15" href="/usershop"><i class="fi-rs-arrow-left"></i>Continue Shopping</a>
+                    </div>
+                    <div class="row" >
+                        <div class="col-9" ></div>
+                        <div class="col-3" >
+                           
+                            <h6>Discount Coupons</h6>
+                            <form id="coupon-form">
+                                
+                                <input id="coupon-input" type="text" placeholder="Coupon code">
+                                <!-- Hide the cancel button by default -->
+                                    <button class="btn btn-primary"  id="cancel" onclick="cancelCoupon(event)" style="display: none;">Cancel</button>
+                                <!-- Show the apply button by default -->
+                                <button  class="btn btn-primary" onclick="applyCoupon(event)" id="apply">Apply</button>
+                            </form>
+                            <div id="coupon-message" class="coupon-message"></div>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <div class="col-12" ><br></div>
+                        </div>
+                    <div class="row" >
+                        <div class="col-9" ></div>
+                        <div class="col-3" >
+                            <div >
+                               <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#discountModal">
+                                Available coupons
+                            </button>
+
+                            </div>
+                        </div>
+                     </div>
+
+                     <div class="row" >
+                        <div class="col-9" ></div>
+                        <div class="col-3" >
+                            <div class="cart-detail-box" >
+                            <div class="card-body">
+                            <div class="cart-total">
+                                <h3>Cart Totals</h3>
+                                <ul class="summary">
+                                    <li>
+                                        <span>Subtotal</span> 
+                                        <span class="cart_subtotal_amount" id="subtotal" >₹<%= cart.totalPrice.toFixed(2) %></span>
+                                    </li>
+                                    <li>
+                                        <span>Coupon Discount</span> 
+                                        <span id="coupon-discount"><% if( discountAmount ) { %>- ₹ <%= discountAmount.toFixed(2) %> <% } else { %>₹ 0<% } %></span>
+                                    </li>
+                                    <li>
+                                        <span class="text-brand fw-900">Total</span> 
+                                       <span class="text-brand fw-900 cart_total_amount" id="total" >₹<% if( discountAmount ) { %><%= discountedTotal.toFixed(2) %><% } else { %><%= cart.totalPrice.toFixed(2) %><% } %></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="row" >
+                        <div class="col-9" ></div>
+                        <div class="col-3 mr-2" >
+                        <div class="cart-action text-center ">
+                                <a href="/checkout" class="btn"> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="discountModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    
+        <div class="modal-dialog" role="document">
+            <div class="modal-content rounded-0">
+             
+
+                <% if( availableCoupons && availableCoupons.length > 0) {  %>
+                <% for( coupon of availableCoupons ) { %>
+                <%  availableCoupons.length %>
+                <div class="modal-content rounded-0">
+                    <div class="modal-body text-center">
+                        <div class="icon text-danger">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="notice">
+                            <% if( coupon.discountType === 'percentage') { %>
+                                <h4>Get <%= coupon.discount %>% Discount</h4>
+                            <% } else if( coupon.discountType === 'fixed-amount' ) { %>
+                                <h4>Get ₹ <%= coupon.discount %> Discount</h4>
+                            <% } %>
+                            <p id="minimumAmount">This coupon only available for purchase above ₹ <%= coupon.minimumAmount %></p>
+                            <p>And valid from <%= moment(coupon.startingDate).format(shortDateFormat) %> to <%= moment(coupon.expiryDate).format(shortDateFormat) %> </p>
+                            <p>Use promo code <spans style="font-size: medium;background-color: skyblue;"  ><%= coupon.name %></span></p>
+                        </div>
+                        <div class="code"></div>
+                    </div>
+                </div>
+            <% } %>
+            <% } %>
+          
+            </div>
+        </div>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<%- include('../partials/userfooter') %>

@@ -1,0 +1,369 @@
+<%- include ('../partials/userheader') %>
+<style>
+/* General Styles */
+.product-img {
+  width: 100%;
+  height: 150px; /* Fixed height for images */
+  overflow: hidden;
+}
+
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensure image covers the container without stretching */
+}
+
+/* Truncate Product Name */
+.product-name {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.product-name.expanded {
+  white-space: normal;
+}
+
+.read-more-link {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  display: none;
+  vertical-align: middle;
+}
+
+.product-name.collapsed + .read-more-link {
+  display: inline;
+}
+
+/* Sidebar Styles */
+
+
+.shop__sidebar
+{
+    width : 200px !important;
+    border: none;
+}
+.shop__sidebar__categories ul {
+  list-style: none;
+  padding: 0;
+}
+
+.shop__sidebar__categories ul li a {
+  color: #333;
+  
+  padding: 5px 10px;
+  border-bottom: 0px solid #eee;
+  text-decoration: none;
+}
+
+.shop__sidebar__categories ul li a:hover, 
+.shop__sidebar__categories ul li a:focus, 
+.shop__sidebar__categories ul li a.active {
+  background-color: #f8f8f8;
+  color: #000;
+}
+
+/* Sorting and Filter Styles */
+.shop__product__option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.shop__product__option__right {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.shop__product__option__right label {
+  margin-right: 10px;
+}
+
+.shop__product__option__right select {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 20px;
+  width:200px;
+  height: 30px;
+}
+
+.shop__product__option__right input[type="checkbox"] {
+  margin-right: 5px;
+  border:none;
+  height:10px;
+  width:15px
+}
+
+.shop__product__option__right label {
+  margin-bottom: 0;
+}
+
+/* Pagination Styles */
+.pagination-area {
+  margin-top: 20px;
+}
+
+.pagination-area .pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.pagination-area .pagination li a {
+  color: #333;
+  padding: 10px 15px;
+  text-decoration: none;
+  border: 1px solid #ddd;
+  margin: 0 2px;
+  border-radius: 5px;
+}
+
+.pagination-area .pagination li a:hover,
+.pagination-area .pagination li a:focus,
+.pagination-area .pagination li.active a {
+  background-color: #f8f8f8;
+  color: #000;
+}
+</style>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    var catValue = urlParams.get('cat');
+    var categoryLinks = document.querySelectorAll(".shop__sidebar__categories ul li a");
+    categoryLinks.forEach(function (link) {
+        var href = link.getAttribute("href");
+        if (!catValue || (catValue && href.includes('cat=' + catValue))) {
+            link.style.color = "black";
+        }
+    });
+});
+
+function toggleOutOfStock() {
+    var hideOutOfStock = document.getElementById("hideOutOfStockCheckbox").checked;
+    // alert(hideOutOfStock)
+    // Redirect to the shop page with the updated hideOutOfStock query parameter
+    window.location.href = "/usershop?hideOutOfStock=" + hideOutOfStock;
+}
+
+function sortProductsByPrice(sortOrder) {
+    const currentUrl = window.location.href;
+    const url = new URL(currentUrl);
+    const params = new URLSearchParams(url.search);
+    if (sortOrder === 'low_to_high') {
+        params.set('sort', 'price_low_to_high');
+    } else if (sortOrder === 'high_to_low') {
+        params.set('sort', 'price_high_to_low');
+    }
+    window.location.href = '/usershop?' + params.toString();
+}
+
+function sortProductsByName(sortOrder) {
+    const currentUrl = window.location.href;
+    const url = new URL(currentUrl);
+    const params = new URLSearchParams(url.search);
+    if (sortOrder === 'aA_to_zZ') {
+        params.set('sort', 'name_aA_to_zZ');
+    } else if (sortOrder === 'Aa_to_Zz') {
+        params.set('sort', 'name_Aa_to_Zz');
+    }
+    window.location.href = '/usershop?' + params.toString();
+}
+
+async function addToCart(productId) {
+    try {
+        const response = await axios.post('/addtocart', { productId });
+        if (!response.data.login) {
+            return window.location.href = '/userlogin';
+        }
+        if (response.data.outOfStock) {
+            alert("Product is out of stock!");
+            return;
+        }
+        if (response.data.newItem === true) {
+            const count = document.getElementById('cartCount');
+            
+            currentCount = parseInt(count.innerHTML);
+            updatedCount = currentCount + 1;
+            count.innerHTML = updatedCount;
+            window.location.reload();
+            Swal.fire({
+                title: 'Product Added to Cart',
+                text: 'The selected product has been added to your cart.',
+                icon: 'success',
+                confirmButtonColor: '#28a745',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            console.error('Unexpected response status:', response.status);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+            });
+        }
+    } catch (error) {
+        console.log(error.message);
+        Swal.fire({
+            title: 'Product Added to Cart',
+            text: 'The selected product has been added to your cart.',
+            icon: 'success',
+            confirmButtonColor: '#28a745',
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+function toggleReadMore(event) {
+    const productNameElement = event.target.previousElementSibling;
+    if (productNameElement.classList.contains('expanded')) {
+        productNameElement.classList.remove('expanded');
+        productNameElement.classList.add('collapsed');
+        event.target.innerText = 'More';
+    } else {
+        productNameElement.classList.add('expanded');
+        productNameElement.classList.remove('collapsed');
+        event.target.innerText = 'Less';
+    }
+}
+</script>
+
+<div class="container my-4"> 
+    <div class="row">
+        <!-- Sidebar Section Begin -->
+        <div class="col-lg-3">
+            <div class="shop__sidebar">
+                <div class="shop_sidebar_accordion">
+                    <div class="accordion" id="accordionExample">
+                        <div class="card">
+                            <div class="card-heading">
+                                <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
+                            </div>
+                            <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <div class="shop__sidebar__categories">
+                                        <ul class="nice-scroll">
+                                            <li><a href="/usershop?cat=All">All</a></li>
+                                            <% categories.forEach(category => { %>
+                                                <li><a href="/usershop?cat=<%= category._id %>"><%= category.name %></a></li>
+                                            <% }); %>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Sidebar Section End -->
+
+        <div class="col-lg-9">
+            <div class="tab-content wow fadeIn animated" id="myTabContent">
+                <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                    <div class="shop__product__option">
+                        <div class="shop__product__option__right">
+                            <label for="sortPrice">Price:</label>
+                            <select id="sortPrice" onchange="sortProductsByPrice(this.value)">
+                                <option value="low_to_high">Low to High</option>
+                                <option value="high_to_low">High to Low</option>
+                            </select>
+                        </div>
+                        <div class="shop__product__option__right">
+                            <label for="sortName">Name:</label>
+                            <select id="sortName" onchange="sortProductsByName(this.value)">
+                                <option value="aA_to_zZ">aA - zZ</option>
+                                <option value="Aa_to_Zz">Aa - Zz</option>
+                            </select>
+                        </div>
+                        <div class="shop__product__option__right">
+                            <input type="checkbox" id="hideOutOfStockCheckbox" onchange="toggleOutOfStock()">
+                            <label for="hideOutOfStockCheckbox">Hide Out of Stock</label>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="row product-grid-4">
+                        <% data.forEach((row,index)=>{ %>
+                            <% if (!row.isBlocked && row.category.islisted) { %>
+                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                    <div class="product-cart-wrap mb-30">
+                                        <div class="product-img-action-wrap">
+                                            <div class="product-img product-img-zoom">
+                                                <a href="/productdetails/<%= row._id %>">
+                                                    <img class="default-img" src="/public/photos/<%= row.productImage[0] %>"  alt="<%= row.productName %>">
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="product-content-wrap">
+                                            <div class="product-name collapsed">
+                                                <a href="/productdetails/<%= row._id %>"><%= row.productName %></a>
+                                            </div>
+                                            <a class="read-more-link" onclick="toggleReadMore(event)">ReadMore</a>
+                                           
+                                            <span style="color: black;"> ( <%= row.stock %> Left) </span>
+                                            <!-- <div class="product-category">
+                                                <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
+                                            </div> -->
+                                            <div class="rating-result" title="90%">
+                                                <span>
+                                                    <span>90%</span>
+                                                </span>
+                                            </div>
+                                            <div class="product-price">
+                                                <span>₹<%= row.oldPrice %></span>
+                                                <% if (row.discount) { %>
+                                                    <span class="old-price"><%= row.discount %>% OFF</span>
+                                                <% } %>
+                                            </div>
+                                            <div class="product-action-1 show">
+                                                <a aria-label="Add To Cart" class="action-btn hover-up" href="#" onclick="addToCart('<%= row._id %>')"><i class="fi-rs-shopping-bag-add"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Pagination Section Begin -->
+<div class="pagination-area mt-15 mb-50">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <% if (currentPage > 1) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>&cat=<%= cat %>">
+                        <i class="material-icons md-chevron_left"></i>
+                    </a>
+                </li>
+            <% } %>
+            <% for (let i = 1; i <= lastPage; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>&search=<%= search %>&cat=<%= cat %>"><%= i < 10 ? '0' + i : i %></a>
+                </li>
+            <% } %>
+            <% if (currentPage < lastPage) { %>
+                <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>&cat=<%= cat %>">
+                        <i class="material-icons md-chevron_right"></i>
+                    </a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+</div>
+<!-- Pagination Section End -->
+
+<%- include ('../partials/userfooter') %>

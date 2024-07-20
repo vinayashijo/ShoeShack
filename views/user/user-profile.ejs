@@ -1,0 +1,648 @@
+﻿<%- include('../partials/userheader') %>
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<script>
+
+function cancelOrder(oid){
+    console.log("Inside cancel order !" + oid);
+    Swal.fire({
+        title: "Do you want to cancel the order?",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '/cancelorder/' + oid,
+                method: 'PATCH',
+                contentType: 'application/json',
+                success: function(res){
+                    Swal.fire(res.message, "", "success").then(() => {
+                        window.location.href = '/getprofile#orders';
+                    });
+                },
+                error: function(xhr, status, error){
+                    Swal.fire(xhr.responseJSON.message, "", "info");
+                }
+            });
+        } else {
+            Swal.fire("Order cancellation was not confirmed", "", "info");
+        }
+    });
+}
+
+    // This is only for tab selection after the update from the next screen
+      document.addEventListener("DOMContentLoaded", async function() {
+
+        //from other pages , its redirected to this page with location hash #addtowallet-tab, 
+        //then take from location hash the value and make it active the tab.
+        // Check if the URL contains a hash fragment
+        // alert(window.location.hash)
+
+        if (window.location.hash) {
+            // Extract the hash without the #
+            const hash = window.location.hash.substring(1);
+            // alert("addtowallet-tab",hash)
+            // Find the corresponding tab link and click it to activate the tab
+            const tabLink = document.querySelector(`a[href="#${hash}"]`);
+           
+           if (tabLink) {
+                tabLink.click();
+            }
+        }
+     
+      document.getElementById('resetForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+    
+        const password = document.getElementById('password').value.trim();
+        const npassword = document.getElementById('npassword').value.trim();
+        const cpassword = document.getElementById('cpassword').value.trim();
+    
+        const passwordError = document.getElementById('passwordError');
+        const npasswordError = document.getElementById('npasswordError');
+        const cpasswordError = document.getElementById('cpasswordError');
+    
+        passwordError.textContent = '';
+        npasswordError.textContent = '';
+        cpasswordError.textContent = '';
+    
+        let isValid = true;
+    
+        if (password === '') {
+          passwordError.textContent = 'Current password is required';
+          isValid = false;
+        }
+        if (npassword === '') {
+          npasswordError.textContent = 'New password is required';
+          isValid = false;
+        }
+        if (cpassword === '') {
+          cpasswordError.textContent = 'Confirm Password is required';
+          isValid = false;
+        }
+        if (npassword !== cpassword) {
+          cpasswordError.textContent = "Doesn't match with New Password";
+          npasswordError.textContent = "Doesn't match with Confirm Password";
+          isValid = false;
+        }
+        // Regular expression for password validation
+        var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+        if (!passwordRegex.test(npassword)) {
+          cpasswordError.className = 'col-md-12 form-group error';
+    
+          cpasswordError.innerHTML = `
+            <label style="border: 1px solid rgb(196, 0, 0); padding: 15px 0; width: 100%; background-color: rgb(255, 172, 172); color: rgb(196, 0, 0);"
+            for="password">
+              Password should contain at least 8 characters, including uppercase letters, lowercase letters, numbers, and symbols
+            </label>
+          `;
+          isValid = false;
+        }
+    
+        const data = { password, npassword, cpassword };
+        if (!isValid) return;
+    
+        try {
+          const response = await fetch('/reset-password', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+    
+          const result = await response.json();
+    
+          if (response.ok) 
+            {
+                successMessage.textContent = 'Changed password successfully';
+                successMessage.style.display = 'block';
+                successMessage.className = 'alert alert-success';
+            } 
+            else 
+            {
+                successMessage.textContent = 'Error : ' + result.message;
+                successMessage.style.display = 'block';
+                successMessage.className = 'alert alert-danger';
+            }
+        } 
+        catch (error) 
+        {
+                successMessage.textContent = 'Error on changing your password: ' + error.message;
+                successMessage.style.display = 'block';
+                successMessage.className = 'alert alert-danger';
+        }
+      });
+    
+      document.getElementById('depositForm').addEventListener('submit', async function(e) 
+        {
+        e.preventDefault();
+        const amount = document.getElementById('amt').value.trim();
+        isValid = true;
+        if (amount === '') {
+            amountError.textContent = 'Amount is required';
+            isValid = false;
+        }
+        else if( isNaN(amount)  )
+        {
+            amountError.textContent = 'Amount should be a Number';
+            isValid = false;
+        }
+        if (!isValid) return;
+
+        if (isValid) {
+            const rzp_key = '<%= process.env.RAZORPAY_KEY_ID %>';
+          
+            var options = {
+                                key: rzp_key,
+                                amount: amount * 100,
+                                currency: "INR",
+                                name: "ShoeShack",
+                                description: "Deposit to Wallet",
+                                image: "/public/user/assets/imgs/theme/logo.png",
+                                
+                                // handler: function(response) {
+                                //     var form = document.getElementById('depositForm');
+                                //     response = form.submit();
+                                   handler : async function(response) {
+                                    try {
+
+                                        const depositResponse = await fetch('/depositwallet', {
+                                            method: 'POST', headers: {'Content-Type': 'application/json' },
+                                            body: JSON.stringify({amt: amount,
+                                                razorpay_payment_id: response.razorpay_payment_id
+                                            })
+                                        });
+                                        const result = await depositResponse.json();
+
+                                        if (result.success) {
+                                            successMessage.textContent = 'Deposited to wallet successfully';
+                                            successMessage.style.display = 'block';
+                                            successMessage.className = 'alert alert-success';
+                                            document.getElementById('amt').value = "";
+
+
+                                            const walletBalanceElement = document.getElementById('walletBalance');
+                                            const walletAccBalanceElement = document.getElementById('walletAccBalance');
+
+                                            
+                                            const newBalance = result.newBalance; // Ensure your server returns the new balance
+                                            
+                                            walletBalanceElement.textContent = '₹ ' + newBalance.toFixed(2);
+                                            walletAccBalanceElement.textContent = newBalance.toFixed(2);
+
+                                        } else {
+                                            successMessage.textContent = 'Error depositing to Wallet: ' + result.message;
+                                            successMessage.style.display = 'block';
+                                            successMessage.className = 'alert alert-danger';
+                                        }
+                                        } catch (error) {
+                                            successMessage.textContent = 'Error depositing to Wallet: ' + error.message;
+                                            successMessage.style.display = 'block';
+                                            successMessage.className = 'alert alert-danger';
+                                        }
+                                },
+                                prefill: {
+                                    name: "<%= user.name %>",
+                                    email: "<%= user.email %>",
+                                    },
+                                theme: {
+                                        color: "#3399cc",
+                                    },
+                            };
+
+                            var rzp = new Razorpay(options);
+                            rzp.open();
+                        }
+                        return false;
+    });
+});
+//tab settings
+    //   const urlParams = new URLSearchParams(window.location.search);
+    //   const tab = urlParams.get('tab');
+    //   alert("urlParams")
+    //   if (tab) {
+    //     const tabElement = document.querySelector(`a[href="#${tab}"]`);
+    //     if (tabElement) {
+    //       document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    //       document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('show', 'active'));
+    
+    //       tabElement.classList.add('active');
+    //       document.querySelector(tabElement.getAttribute('href')).classList.add('show', 'active');
+    //     }
+    //   }
+
+    //tab settings
+    
+
+    
+    function validateForm(event) {
+      event.preventDefault(); // Prevent form submission
+    
+      const name = document.getElementById('name').value.trim();
+      const mobile = document.getElementById('mobile').value.trim();
+    
+      const nameError = document.getElementById('nameError');
+      const mobileError = document.getElementById('mobileError');
+    
+      nameError.textContent = '';
+      mobileError.textContent = '';
+    
+      let isValid = true;
+    
+      if (name === '') {
+        nameError.textContent = 'Name is required';
+        isValid = false;
+      } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+        nameError.textContent = 'Name should only contain letters and spaces';
+        isValid = false;
+      }
+    
+      if (mobile === '') {
+        mobileError.textContent = 'Mobile number is required';
+        isValid = false;
+      } else if (!/^\d{10}$/.test(mobile)) {
+        mobileError.textContent = 'Mobile number should be 10 digits';
+        isValid = false;
+      }
+    
+      if (isValid) {
+        update();
+      }
+    
+      return false;
+    }
+    
+    async function update() {
+      try {
+        const name = document.getElementById('name').value.trim();
+        const mobile = document.getElementById('mobile').value.trim();
+        const response = await axios.put('/saveprofile', { name, mobile });
+    
+        if (response.data.success) {
+          const successMessage = document.getElementById('successMessage');
+          successMessage.textContent = 'Profile updated successfully';
+          successMessage.style.display = 'block';
+        } 
+        else {
+          const successMessage = document.getElementById('successMessage');
+          successMessage.textContent = 'Error updating profile';
+          successMessage.style.display = 'block';
+          successMessage.className = 'alert alert-danger';
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        alert("Error updating profile");
+      }
+    }
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/usershop" rel="nofollow">Home</a>
+                <span></span> Pages
+                <span></span> Account
+            </div>
+        </div>
+    </div>
+    <section class="pt-40 pb-100">
+        <div class="container">
+            <div class=""row>
+                <div id="successMessage" class="alert alert-success"  style="display:none;"></div>
+               </div>
+            <div class="row">
+                <div class="col-lg-10 m-auto">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="dashboard-menu">
+                                <ul class="nav flex-column" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account Details</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="false"><i class="fi-rs-marker mr-10"></i>My Address</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="addtowallet-tab" data-bs-toggle="tab" href="#addtowallet" role="tab" aria-controls="addtowallet" aria-selected="false">                                        
+                                            <i class="fi-rs-user mr-10"></i> Add to Wallet</a>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="wallethistory-tab" data-bs-toggle="tab" href="#wallethistory" role="tab" aria-controls="wallethistory" aria-selected="false">                                        
+                                            <i class="fi-rs-shopping-bag mr-10"></i> Wallet History </a>
+                                        </a>
+                                    </li>
+
+                                  
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="changepass-tab" data-bs-toggle="tab" href="#changepass" role="tab" aria-controls="changepass" aria-selected="false">                                        
+                                            <i class="fi-rs-user mr-10"></i> Change Password </a>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/userlogin"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
+                                  
+                                   
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Account Details</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <p>Already have an account? <a href="/userlogin">Log in instead!</a></p>
+                                                <br/>
+                                                <form  id="accountDetailForm"  method="post"  onsubmit="return validateForm(event)">
+                                                    <% if (user && user.isActive) { %>
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label>Name <span class="required">*</span></label>
+                                                            </div>
+                                                        <div class="form-group col-md-6">
+                                                            <input required="" class="form-control square" id="name" name="name" type="text" value="<%= user.name%>">
+                                                        
+                                                            <span id="nameError" class="error"></span>
+                                                        </div>
+                                                    
+                                                        <div class="form-group col-md-6">
+                                                            <label>Email Address <span class="required">*</span></label>
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                            <input required="" class="form-control square"   id="email"  disabled="email" type="email" value="<%= user.email %>">
+                                                            <span id="emailError" class="error"></span>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Mobile<span class="required">*</span></label>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <input required="" class="form-control square" id="mobile"   name="mobile" type="text" value="<%= user.mobile %>">
+                                                            <span id="mobileError" class="error"></span>
+
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Save</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                                   
+                                                    <% } else { %>
+                                                    <div class="row">
+                                                        No User Records Found!
+                                                    </div>
+                                                    <% } %>
+
+                                                  <div class="row mt-3">
+                                                        <a style="box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px; padding: 15px 30px;" class="text-primary fw-700">
+                                                            <b>Wallet Balance : ₹  <span id="walletAccBalance"> <%= user.wallet ? user.wallet.toFixed(2) : 0 %> </span> </b>
+                                                             <!-- <a href="/getprofile" >Refresh </a> -->
+                                                        </a>
+                                                    </div> 
+                                                  
+                                                    <div class="row mt-3">
+                                                        <a style="box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px; padding: 15px 30px;" class="text-primary fw-700">
+                                                             <b>Referal: <%= user.referralCode %> </b>
+                                                        </a>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Your Orders</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table" >
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="col-md-1" >Order</th>
+                                                            <th class="col-md-2">Date</th>
+                                                            <th class="col-md-1">Mode</th>
+                                                            <th class="col-md-2">Order Status</th>
+                                                            <th class="col-md-2">Pay Status</th>
+                                                            <th class="col-md-1">Total</th>
+                                                            <th class="col-md-4">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% if (userorders && userorders.length > 0) { %>
+                                                            <% userorders.forEach((item) => { %>
+                                                                <tr>
+                                                                    <td><%= item.trackingId %></td>
+                                                                    <td><%= item.orderDate %></td>
+                                                                    <td><%= item.paymentMethod %></td>
+                                                                    <td><%= item.orderStatus %></td>
+                                                                    <td><%= item.paymentStatus %></td>
+                                                                    <td><%= item.totalprice.toFixed(2) %></td>
+                                                                    <td>
+                                                                        <% if(item.orderStatus !== 'Delivered' && item.orderStatus !== 'Shipped' && item.orderStatus !== 'Cancelled' && item.orderStatus !== 'Returned') { %>
+                                                                            <a onclick="cancelOrder('<%= item._id %>')"><button class="btn-small btn-danger">Cancel</button></a>
+                                                                        <% } else if (item.orderStatus === 'Delivered') { %>
+                                                                            <a onclick="cancelOrder('<%= item._id %>')"><button class="btn-small btn-danger">Return</button></a>
+                                                                        <% } %>
+                                                                        <a href="/view-order-products/<%= item._id %>"><button class="btn-small btn-secondary">View</button></a>
+                                                                    </td>
+                                                                </tr>
+                                                            <% }); %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="7">No Orders found.</td>
+                                                            </tr>
+                                                        <% } %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 pb-25">
+                                            <div class="col-lg-12 text-end pr-4 pe-4">
+                                            <a href="/addaddress" class="btn btn-light fw-bold">Add Address</a>
+                                            </div>
+                                            <div class="card">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">Shipping Address</h5>
+                                                   
+                                                </div>
+                                                <div class="card-body">
+                                                    
+                                                    <% if (user && user.address && user.address.length > 0) { %>
+                                                        <% user.address.forEach((item) => { %>
+                                                            <div class="address-block mb-4 p-3 border rounded">
+                                                                <address class="mb-0">
+                                                                    <strong><%= item.name %></strong><br>
+                                                                    <%= item.houseName %><br>
+                                                                    <%= item.cityOrTown %><br>
+                                                                    <%= item.district %><br>
+                                                                    <%= item.state %><br>
+                                                                    Pin: <%= item.pincode %><br>
+                                                                    Phone: <%= item.mobile %>
+                                                                </address>
+                                                                <div class="row buttons mt-2">
+                                                                    <div class="col">
+                                                                        <a class="edit btn btn-secondary text-white fw-bold" href="/editaddress/<%= item._id %>">Edit Address</a>
+                                                                    </div>
+                                                                    <div class="col text-end">
+                                                                        <a href="/removeAddress/<%= item._id %>" class="remove btn btn-secondary text-white fw-bold">Remove Address</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <% }); %>
+                                                    <% } else { %>
+                                                        <p>No address found.</p>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="addtowallet" role="tabpanel" aria-labelledby="addtowallet-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Deposit to Wallet</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form  id="depositForm"  method="post" action="/depositwallet" >
+                                            
+                                                <div class="row">
+                                                    <div class="form-group col-md-6">
+                                                        <label>Amount to be Deposited <span class="required">*</span></label>
+                                                        </div>
+                                                    <div class="form-group col-md-6">
+                                                        <input type="text" name="amt" id="amt"  value=""  class="form-control square"></input>
+                                                        <span id="amountError" class="error"></span>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <button type="submit" class="btn btn-fill-out submit" name="wallet" value="Submit">Save</button>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <b><span id="walletBalance">Wallet Balance : ₹ <%= user.wallet ? user.wallet.toFixed(2) : 0 %> </span></b>
+                                                        <!-- ?div class="row mt-3 float-right "> -->
+                                                           <!-- <br/> <a href="/getprofile" >Refresh</a> -->
+                                                            <!-- </div> -->
+                                                    </div>
+                                                </div>
+                                            </form> 
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="wallethistory" role="tabpanel" aria-labelledby="wallethistory-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Your Wallet History</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Amount</th>
+                                                            <th>Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% if (user && user.walletHistory && user.walletHistory.length > 0) { %>
+                                                            <% user.walletHistory.forEach((item) => { %>
+                                                                <tr>
+                                                                    <td><%=  moment(item.date).format('DD-MM-YYYY') %></td>
+                                                                    <td><%= item.amount.toFixed(2) %></td>
+                                                                    <td><%= item.message %></td>
+                                                                </tr>
+                                                            <% }); %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="5">No Wallet histories found.</td>
+                                                            </tr>
+                                                        <% } %>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="changepass" role="tabpanel" aria-labelledby="changepass-tab">
+                                   
+                                    <div class="card">
+                                         
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Change Password</h5>
+                                           
+                                        </div>
+                                        <div class="card-body">
+                                            <% if (user && user.isActive) { %>
+                                               
+                                            <form  name="resetForm" id="resetForm"  method="post"  >
+                                                
+                                                <div class="row">
+                                                    <div class="form-group col-md-6">
+                                                        <label>Current Password <span class="required">*</span></label>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <!-- d-none always hidden -->
+                                                        <input required="" class="form-control square" id="password" name="password" type="password">
+                                                        <input  class="form-control square d-none"    id="epassword" name="epassword" type="epassword" value="<%= user.password %>">
+                                                        <span id="passwordError" class="error"></span>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>New Password <span class="required">*</span></label>
+                                                        </div>
+                                                   <div class="form-group col-md-6">
+                                                        <input required="" class="form-control square" id="npassword" name="npassword" type="password">
+                                                        <span id="npasswordError" class="error"></span>
+                                                    </div>
+                                                    <div class="form-group col-md-6">
+                                                        <label>Confirm Password <span class="required">*</span></label>
+                                                        </div><div class="form-group col-md-6">
+                                                        <input required="" class="form-control square" id="cpassword"name="cpassword" type="password">
+                                                        <span id="cpasswordError" class="error"></span>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <button type="submit" class="btn btn-fill-out submit" name="reset" value="Submit">Reset</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5">No User Info found.</td>
+                                                </tr>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+
+<%- include('../partials/userfooter') %>
