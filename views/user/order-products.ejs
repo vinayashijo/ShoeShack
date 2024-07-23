@@ -439,10 +439,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function razorpayPayment(order) {
     const rzp_key = "<%= process.env.RAZORPAY_KEY_ID %>";
-
+    // console.log(order.totalprice.toFixed(1) * 100)
+    //if 
     var options = {
       key: rzp_key,
-      amount: order.totalprice * 100,
+      amount: order.totalprice.toFixed(2) * 100,
       currency: "INR",
       name: "Shoe Shack",
       description: "Shoe Shack Payment System",
@@ -472,14 +473,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.getElementById("retryPay").addEventListener("click", function () {
-    // console.log("hi");
     const order = JSON.parse(this.getAttribute("data-retryorder"));
-
-    // console.log(order);
+    console.log(order);
 
     if (order) {
       const paymentMethod = order.paymentMethod;
-      console.log(paymentMethod);
+      console.log(order);
       console.log("order.paymentStatus", order.paymentStatus);
       if (paymentMethod === "Razorpay" && order.paymentStatus == "Failed") {
         console.log("order.paymentStatus :Failed");
