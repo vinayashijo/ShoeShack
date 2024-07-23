@@ -59,7 +59,7 @@ const loadAdminDashboard = async (req, res) => {
       orders.forEach(order => {
         overallOrderAmount += order.totalprice || 0;
         const orderDate =  formatDateString(order.orderDate)
-        console.log(orderDate.getMonth, currentMonth)
+        // console.log(orderDate.getMonth, currentMonth)
         if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) {
           currentMonthEarning += order.totalprice || 0;
         }
@@ -156,7 +156,7 @@ const loadAdminDashboard = async (req, res) => {
       pieChartData.forEach(data => {
         data.totalSales = parseFloat(data.totalSales).toFixed(2);
       });
-      console.log("load pieChartData" ,pieChartData)
+      // console.log("load pieChartData" ,pieChartData)
 
       // Render the dashboard EJS template with data
       res.render('admin/dashboard-test', {
@@ -213,42 +213,51 @@ const loadproductlist=function(req,res){
 //orders
 const getAdminOrderList = async (req, res) => {
   try {
-    // console.log("getadminOrderList")
-
-      // const { sortData,sortOrder } = req.query;
+    //  console.log("getadminOrderList")
+      let { sortData,sortOrder } = req.query;
 
       const { search = '' } = req.query;
       const limit = 10;
-      const query = {};
-
-    
 
       let page = Number(req.query.page);
-      if (isNaN(page) || page < 1) {
+      if (isNaN(page) || page < 1) {                                  
           page = 1;
       }
 
+      if(!sortData)
+      {  
+        console.log("sortorder nothing,so orderdate")
+        sortData = "orderDate"
+      }
+      const sort = {};
+      sort[sortData] =1
+
+      if (sortData) {
+          if (sortOrder === 'asc') {
+              sort[sortData] = 1;
+          } else {
+              sort[sortData] = -1;
+          }
+      }
+   
       // search criteria
       const searchCriteria = {};
       if (search) {
           searchCriteria.$or = [
               { trackingId: { $regex: search, $options: 'i' } },
-              { 'billingdetails.name': { $regex: search, $options: 'i' } }
+              // { 'billingdetails.name': { $regex: search, $options: 'i' } }
           ];
       }
-    //   if (search) {
-    //     query.trackingId = new RegExp(search, 'i'); 
-    // }
 
-      const ordersCount = await orderModel.find(searchCriteria).count();
-      const orders = await orderModel.find(searchCriteria)
-          .sort({orderDate : 1})
+      const ordersCount = await orderModel.find().count();
+      const orders = await orderModel.find()
+          .sort(sort)
           .skip((page - 1) * paginationHelper.ORDER_PER_PAGE)
           .limit(paginationHelper.ORDER_PER_PAGE)
           .populate('userId')
           .populate('items.product')
 
-       res.render('admin/orders', {
+          res.render('admin/orders', {
           orders: orders,
           moment: moment, // Pass moment to the view
           shortDateFormat: 'DD-MM-YYYY', // Pass the date format
@@ -258,15 +267,14 @@ const getAdminOrderList = async (req, res) => {
           nextPage : page + 1,
           prevPage: page - 1,
           lastPage : Math.ceil(ordersCount/ paginationHelper.ORDER_PER_PAGE),
-          search : search
-          // sortData: sortData,
-          // sortOrder: sortOrder,
+          search : search,
+          sortData: sortData,
+          sortOrder: sortOrder,
       });
   } catch (error) {
       console.log(error);
   }
 };
-
 
   const orderDetails = async (req, res) => {
     try {
@@ -281,7 +289,7 @@ const getAdminOrderList = async (req, res) => {
                 }
             });
 
-          console.log(order)
+          // console.log(order)
         res.render('admin/orders-detail', { order });
 
     } catch (err) {
@@ -290,45 +298,6 @@ const getAdminOrderList = async (req, res) => {
     }
   };
 
-// const changeOrderStatus = async (req, res) => {
-
-//   // Define allowed transitions
-// const allowedTransitions = {
-//   'Pending': ['Confirmed', 'Cancelled'],
-//   'Confirmed': ['Shipped', 'Delivered'],
-//   'Shipped': ['Delivered'],
-// };
-
-//   try {
-//     const { orderId } = req.params;
-
-//       const { status } = req.body;
-//       console.log("changeOrderStatus",status,orderId)
-
-//       if (status === 'Cancelled') {
-//           // if the order is cancelled 
-//           const order = await orderModel.findOne({ _id: orderId });
-//           console.log(order)
-          
-//           for (let item of order.items) {
-//             console.log(" item.quantity ", item.quantity )
-//               await productModel.updateOne({ _id: item.product }, { $inc: { stock: item.quantity } });
-//           }
-//           await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { 'items.$[].status': status } });
-
-//       } else {
-//           await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { 'items.$[].status': status } });
-//       }
-
-//       const newStatus = await orderModel.findOne({ _id: orderId });
-//       console.log("newstatus",newStatus,newStatus.items[0].status )
-
-//       res.status(200).json({ success: true, status: newStatus.items[0].status });
-
-//   } catch (error) {
-//       console.log(error);
-//   }
-// };
 
 const changeOrderStatus = async (req, res) => {
   // Define allowed transitions
@@ -344,14 +313,7 @@ const changeOrderStatus = async (req, res) => {
 
   try {
     const { orderId } = req.params;
-
-    console.log(req.params)
-
-    console.log(req.body)
-
-
     const { newStatus } = req.body;
-
     const order = await orderModel.findOne({ _id: orderId });
 
     if (!order) {
@@ -359,20 +321,12 @@ const changeOrderStatus = async (req, res) => {
     }
 
     const currentStatus = order.items[0].status;
-    console.log(currentStatus)
-
-
-    // if (!allowedTransitions[currentStatus].includes(newStatus)) {
-    //   return res.status(400).json({ success: false, message: `Cannot change status from ${currentStatus} to ${newStatus}` });
-    // }
-
-    console.log(newStatus,currentStatus)
+    // console.log(currentStatus)
 
     if (newStatus === 'Cancelled') {
       for (let item of order.items) {
         await productModel.updateOne({ _id: item.product }, { $inc: { stock: item.quantity } });
-        console.log("productModel.updated stock with item.quantity" ,item.quantity  ) 
-
+        // console.log("productModel.updated stock with item.quantity" ,item.quantity  ) 
       }
     }
 
@@ -381,12 +335,7 @@ const changeOrderStatus = async (req, res) => {
       { $set: { 'items.$[].status': newStatus , orderStatus : newStatus} }
     );
 
-    console.log("orderModel.items.$[].status newStatus " , newStatus) 
-
     const updatedOrder = await orderModel.findOne({ _id: orderId });
-
-    console.log("updatedOrder is " , updatedOrder) 
-
 
     res.status(200).json({ success: true, message: 'Order status updated successfully', status: updatedOrder.items[0].status });
   } catch (error) {
@@ -399,7 +348,7 @@ const getOrderDetails =  async (req, res, next) => {
   try {
 
       const orderId = req.params.id
-      console.log("getOrderDetails" ,orderId)
+      // console.log("getOrderDetails" ,orderId)
 
       const orders = await orderModel.findOne({ _id : orderId}).populate('items.product')
       
@@ -417,10 +366,10 @@ const getOrderDetails =  async (req, res, next) => {
 const updateStatus = async (req, res, next) => {
   try {
 
-    console.log("upodate status")
+    // console.log("upodate status")
 
     const { orderId, productId, selectedStatus } = req.body;
-    console.log(orderId, productId, selectedStatus  )
+    // console.log(orderId, productId, selectedStatus  )
 
     const order = await orderModel.findById(orderId);
     const cancelProduct = order.items.find(item => item.product.toString() === productId)            
@@ -431,8 +380,8 @@ const updateStatus = async (req, res, next) => {
 
     let paymentstatus ="Pending"
     
-    console.log("selectedStatus",selectedStatus)
-    console.log("paymentMerthod",paymentMethod)
+    // console.log("selectedStatus",selectedStatus)
+    // console.log("paymentMerthod",paymentMethod)
 
     if(paymentMethod == "Razorpay" )
       {
@@ -442,7 +391,7 @@ const updateStatus = async (req, res, next) => {
           }
       }
 
-    console.log("paymentstatus",paymentstatus)
+    // console.log("paymentstatus",paymentstatus)
     const updatedOrder = await orderModel.findOneAndUpdate(
         { _id: orderId, 'items.product': productId },
         { $set: { 'items.$.status': selectedStatus  ,'orderStatus': selectedStatus, 'paymentStatus' :paymentstatus } },
@@ -474,7 +423,6 @@ const updateStatus = async (req, res, next) => {
 };
 
 const formatDateString  = (orderDate) => {
-  console.log(orderDate)
       // Split the date string into day, month, and year components
     const parts = orderDate.split('-');
     const day = parseInt(parts[0], 10);    // Day (assuming dd format)
@@ -483,10 +431,8 @@ const formatDateString  = (orderDate) => {
 
     // Create a new Date object using the parsed components
     const orderdte = new Date(year, month, day);
-    //const orderDateMonth = orderdte.getMonth();
-   // console.log(orderdte)
+    return orderdte
 
-return orderdte
 }
 
 //sales report
@@ -497,7 +443,7 @@ const getSalesReport = async (req, res) => {
       const currentDate = new Date();
       let startDate, endDate;
 
-          console.log("I'm in sales report from, to, period, sortData, sortOrder ",from, to, period, sortData, sortOrder )
+          // console.log("I'm in sales report from, to, period, sortData, sortOrder ",from, to, period, sortData, sortOrder )
       // Determine startDate and endDate based on period
       switch (period) {
           case 'Daily':
@@ -594,9 +540,6 @@ const getSalesReport = async (req, res) => {
          
           for (const item of order.items) {
             // console.log("i m in orders items" )
-            // console.log(productObj)
-            // console.log("item.product",item.product)
-
             if (productObj[item.product]) {
                 productObj[item.product]++;
             } else {
@@ -609,13 +552,6 @@ const getSalesReport = async (req, res) => {
         // console.log('overallProductCount:', Object.keys(productObj).length);
 
       overallProductCount = Object.keys(productObj).length
-
-      // console.log("overallOrderAmount",overallOrderAmount)
-      // console.log("overallDiscountAmount",overallDiscountAmount)
-      // console.log("overallProductCount",overallProductCount)
-      // console.log("overallSalesCount" ,overallSalesCount)
-      // console.log("currentMonthEarning" ,currentMonthEarning)
-
       let page = Number(req.query.page);
       if (isNaN(page) || page < 1) {
           page = 1;

@@ -217,49 +217,70 @@
         toInput.value = endDate.toISOString().slice(0, 10);
     });
 });
+function generatePDF() {
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    // Set font style for header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
 
-        doc.text("Sales Report", 10, 20);
-        // doc.text("Management Reports", 10, 20);
+    // Calculate center position for the title "Sales Report"
+    const titleWidth = doc.getStringUnitWidth("Sales Report") * doc.internal.getFontSize() / doc.internal.scaleFactor;
+    const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
+    const titleY = 20; // Position for the title
 
-        const amount = '<%= overallOrderAmount %>';
-        const orders = '<%= overallSalesCount %>';
-        const products = '<%= overallProductCount %>';
-        const monthlyEarnings = '<%= currentMonthEarning %>';
+    // Title: Sales Report (centered)
+    doc.text("Sales Report", titleX, titleY);
 
-        doc.text(`Amount: ₹${amount}`, 10, 30);
-        doc.text(`Orders: ${orders}`, 10, 40);
-        doc.text(`Products: ${products}`, 10, 50);
-        doc.text(`Monthly Earnings: ₹${monthlyEarnings}`, 10, 60);
+    // Reset font style for summary and table
+    doc.setFont("helvetica");
+    doc.setFontSize(12);
 
-        const element = document.querySelector(".table-responsive table"); // Get the table element
+    // Summary section
+    const amount = '<%= overallOrderAmount.toFixed(2) %>';
+    const orders = '<%= overallSalesCount %>';
+    const products = '<%= overallProductCount %>';
+    const monthlyEarnings = '<%= currentMonthEarning.toFixed(2) %>';
 
-        // Get the table headers
-        const headers = Array.from(element.querySelectorAll("thead th")).map(th => th.innerText);
+    // Add space between title and summary section
+    let y = titleY + 20;
+    // Amount with Rupee symbol (Unicode: ₹)
+    doc.text(`Amount: ${amount}`, 14, y += 10);
+    // Orders
+    doc.text(`Orders: ${orders}`, 14, y += 10);
 
-        // Get the table rows
-        const rows = Array.from(element.querySelectorAll("tbody tr")).map(tr => {
-            return Array.from(tr.querySelectorAll("td")).map(td => td.innerText);
-        });
+    // Products
+    doc.text(`Products: ${products}`, 14, y += 10);
 
-        // Set initial y position for placing content
-        let y = 70;
+    // Monthly Earnings with Rupee symbol
+    doc.text(`Monthly Earnings: ${monthlyEarnings }`, 14, y += 10);
 
-        // Create a new jsPDF table
-        doc.autoTable({
-            startY: y,
-            head: [headers],
-            body: rows
-        });
+    // Table section
+    const element = document.querySelector(".table-responsive table");
 
-            // Save the PDF
-        // doc.save("sales-report.pdf");
+    // Get table headers
+    const headers = Array.from(element.querySelectorAll("thead th")).map(th => th.innerText);
 
-        doc.save('sales_report.pdf');
-    }
+    // Get table rows
+    const rows = Array.from(element.querySelectorAll("tbody tr")).map(tr => {
+        return Array.from(tr.querySelectorAll("td")).map(td => td.innerText);
+    });
+
+    // Add space before the table
+    y += 10;
+
+    // Create jsPDF AutoTable
+    doc.autoTable({
+        startY: y,
+        head: [headers],
+        body: rows
+    });
+
+    // Save the PDF
+    doc.save('sales_report.pdf');
+}
 
     function excelDownload() {
     var table = document.querySelector("table");

@@ -114,6 +114,53 @@
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
      
+    <!-- Pagination Section Begin -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= prevPage %>&search=<%= search %>" data-page="<%= prevPage %>">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                <% } %>
+                <% if (currentPage > 2) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=1&search=<%= search %>" data-page="1">1</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <% } %>
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>" data-page="<%= currentPage - 1 %>"><%= currentPage - 1 %></a>
+                    </li>
+                <% } %>
+                <li class="page-item active">
+                    <span class="page-link"><%= currentPage %></span>
+                </li>
+                <% if (hasNextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>" data-page="<%= currentPage + 1 %>"><%= currentPage + 1 %></a>
+                    </li>
+                <% } %>
+                <% if (nextPage !== lastPage && currentPage !== lastPage) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= lastPage %>&search=<%= search %>" data-page="<%= lastPage %>"><%= lastPage %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage !== lastPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= nextPage %>&search=<%= search %>" data-page="<%= nextPage %>">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+    <!-- Pagination Section End -->
 </section> <!-- content-main end// -->
 
 <script>
@@ -178,53 +225,6 @@
     });
 }
 
-    
-//     function blockOrUnblockCoupon(couponId, clicked) {
-//         let confirmationMessage;
-     
-//         if (clicked === 'Unlist') {
-//             confirmationMessage = "Are you sure you want to Block this Coupon?";
-//         } else {
-//             confirmationMessage = "Are you sure you want to UnBlock this Coupon?";
-//         }
-
-//         swal({
-//             text: confirmationMessage,
-//             buttons: ["cancel", true],
-//         }).then((result) => {
-//             if (result === true) {
-//                 $.ajax({
-//                     url: `/couponunlist?id=${couponId}`,
-//                     method: 'PATCH',
-//                     contentType: 'application/json',
-//                     success: function (response) {
-//                         if (response.success) {
-//                             if (clicked === 'Unlist') {
-//                                 swal("Coupon Unlisted!", {
-//                                     icon: "success",
-//                                 }).then(() => {
-//                                     location.reload();
-//                                 });
-//                             } else {
-//                                 swal("Coupon Listed!", {
-//                                     icon: "success",
-//                                 }).then(() => {
-//                                     location.reload();
-//                                 });
-//                             }
-//                         } else {
-//                             console.error('Blocking/Unblocking failed');
-//                         }
-//                     },
-//                     error: function (xhr, status, error) {
-//                         console.error('Ajax error:', error);
-//                     }
-//                 });
-//             }
-// });
-// }
-
-
-</script>
+    </script>
 
 <%- include ('../partials/adminfooter') %>

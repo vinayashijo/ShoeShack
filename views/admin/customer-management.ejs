@@ -9,10 +9,13 @@
     <div class="card mb-4">
         <header class="card-header">
             <div class="row gx-3">
+            
+            <form method="GET" action="customermanagement"   >
                 <div class="col-lg-4 col-md-6 me-auto">
-                    <input type="text" placeholder="Search..." class="form-control">
+                    <input type="text" id="search" name="search" placeholder="Search..." class="form-control" value="<%= search %>" >
                 </div>
-                <div class="col-lg-2 col-6 col-md-3">
+            </form>
+                <!-- <div class="col-lg-2 col-6 col-md-3">
                     <select class="form-select">
                         <option>Status</option>
                         <option>Active</option>
@@ -26,7 +29,7 @@
                         <option>Show 30</option>
                         <option>Show 40</option>
                     </select>
-                </div>
+                </div> -->
             </div>
         </header> <!-- card-header end// -->
         <div class="card-body">
@@ -76,18 +79,54 @@
             </div> <!-- table-responsive //end -->
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
+   
+    <!-- Pagination Section Begin -->
     <div class="pagination-area mt-15 mb-50">
         <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
-                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= prevPage %>&search=<%= search %>" data-page="<%= prevPage %>">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                <% } %>
+                <% if (currentPage > 2) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=1&search=<%= search %>" data-page="1">1</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <% } %>
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>" data-page="<%= currentPage - 1 %>"><%= currentPage - 1 %></a>
+                    </li>
+                <% } %>
+                <li class="page-item active">
+                    <span class="page-link"><%= currentPage %></span>
+                </li>
+                <% if (hasNextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>" data-page="<%= currentPage + 1 %>"><%= currentPage + 1 %></a>
+                    </li>
+                <% } %>
+                <% if (nextPage !== lastPage && currentPage !== lastPage) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= lastPage %>&search=<%= search %>" data-page="<%= lastPage %>"><%= lastPage %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage !== lastPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= nextPage %>&search=<%= search %>" data-page="<%= nextPage %>">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                <% } %>
             </ul>
         </nav>
     </div>
+    <!-- Pagination Section End -->
 </section> <!-- content-main end// -->
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>

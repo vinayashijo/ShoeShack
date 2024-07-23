@@ -1,13 +1,26 @@
 const couponModel=require('../../model/couponModel')
 const cartModel=require('../../model/cartModel')
 const couponHelper=require('../../helper/couponHelper')
+const paginationHelper=require('../../helper/paginationHelper')
+
 const moment = require("moment")
 
 module.exports={
     getCoupons: async (req, res,next) => {
         try {
+                        console.log("i m in coupons")
+
             const { search, sortData, sortOrder } = req.query;
-            const condition = {};
+            const condition = {};          
+            console.log("i m in coupons")
+
+            console.log( search, sortData, sortOrder )
+
+            let page = Number(req.query.page);
+            if (isNaN(page) || page < 1) {
+                page = 1;
+            }
+
             if (search) {
                 condition.$or = [
                     { name: { $regex: search, $options: "i" } },
@@ -17,26 +30,43 @@ module.exports={
             }
             const sort = {};
             if (sortData) {
-                if (sortOrder === 'Ascending') {
+                if (sortOrder === 'asc') {
                     sort[sortData] = 1;
                 } else {
                     sort[sortData] = -1;
                 }
             }
-            const coupons = await couponModel.find(condition).sort(sort);
-    
-            res.render('admin/coupons', {
+
+            const couponsCount = await couponModel.countDocuments(condition);
+            const limit =  paginationHelper.SALES_PER_PAGE;
+
+            console.log(couponsCount)
+            console.log(limit)
+            console.log(sort)
+            console.log(condition)
+
+            const filteredCoupons = await couponModel.find(condition)
+                .sort(sort)
+                .skip((page - 1) * paginationHelper.SALES_PER_PAGE)
+                .limit(limit);             
+                            
+                res.render('admin/coupons', {
                 admin: true,
-                coupons: coupons,
-                search: search,
+                coupons: filteredCoupons,
+                moment,
+                shortDateFormat: 'DD-MM-YYYY', 
+                currentPage: page,
+                hasNextPage: page * paginationHelper.SALES_PER_PAGE < couponsCount,
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                lastPage: Math.ceil(couponsCount / paginationHelper.SALES_PER_PAGE),
                 sortData: sortData,
                 sortOrder: sortOrder,
-                moment: moment,
-                shortDateFormat: 'DD-MM-YYYY', // Pass the date format
+                search: search,
             });
         } catch (error) {
             console.log(error);
-            throw error;
             next(error)
         }
     },

@@ -70,8 +70,8 @@ async function applyCoupon(event) {
         });
      
         if (response.data.discounted) {
-            totalCartPrice.innerHTML = `₹ ${response.data.discounted.discountedTotal}`;
-            couponDiscount.innerHTML = `-₹ ${response.data.discounted.discountAmount}`;
+            totalCartPrice.innerHTML = `₹ ${response.data.discounted.discountedTotal.toFixed(2)}`;
+            couponDiscount.innerHTML = `-₹ ${response.data.discounted.discountAmount.toFixed(2)}`;
         }
         if(response.data.coupona){
             couponminimum.innerHTML=`${response.data.coupon}`
@@ -205,7 +205,6 @@ function showProductDetails(productId) {
 
                 subtotalElem.textContent = '₹' + (price * newQuantity).toFixed(2);
                 const subtotalPriceElem = document.getElementById('subtotal');
-
                 const totalPriceElem = document.getElementById('total');
            
                 if (subtotalPriceElem)
@@ -338,10 +337,10 @@ function showProductDetails(productId) {
 
         // const subtotalPriceElem = document.querySelector('.cart_subtotal_amount');
         const subtotalPriceElem = document.querySelector('.subtotal');
-        alert(subtotalPriceElem)
+        //alert(subtotalPriceElem)
 
         const totalPriceElem = document.querySelector('.total');
-        alert(totalPriceElem)
+        //alert(totalPriceElem)
 
         subtotalPriceElem.textContent = '₹' + cartData.totalPrice.toFixed(2);
         totalPriceElem.textContent = '₹' + cartData.totalPrice.toFixed(2);

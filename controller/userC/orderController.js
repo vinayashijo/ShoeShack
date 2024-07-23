@@ -1,4 +1,6 @@
 const cartModel = require("../../model/cartModel");
+const couponModel = require("../../model/couponModel");
+
 const userModel = require("../../model/userModel");
 const cartHelper = require("../../helper/cartHelper");
 const paymentHelper = require("../../helper/paymentHelper"); //24/6/24
@@ -6,7 +8,8 @@ const orderModel = require("../../model/orderModel");
 const productModel = require("../../model/productModel"); 
 const product = require("../../model/productModel");
 const paginationHelper = require("../../helper/paginationHelper"); //24/6/24
-const moment = require("moment")
+const moment = require("moment");
+const couponHelper = require("../../helper/couponHelper");
 
 
 const getCheckout = async (req, res) => {
@@ -35,6 +38,7 @@ const getCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
+        console.log("i m in place order")
         const { addressId, paymentMethod, walletAmount } = req.body;
         const userId = req.session.user._id;
 
@@ -64,8 +68,26 @@ const placeOrder = async (req, res) => {
             // console.log("totalAmount",totalAmount)
         }
 
-        //discountAmount //coupons
-        let discountAmount =0
+         //discountAmount //coupons
+         let discountAmount=0
+        let discounted= {};
+        if( cart && cart.coupon && totalAmount > 0 ) {
+            discounted = await couponHelper.discountPrice( cart.coupon, totalAmount )
+            console.log(discounted)
+
+            await couponModel.updateOne({ _id : cart.coupon},{
+                $push : {
+                    users : user
+                }
+            })
+            console.log("couponModel users added")
+        }   
+        console.log(discounted)  //{discountAmount,discountedTotal ->(totalamt-discount )}
+        if(discounted.discountAmount>0){
+            discountAmount=discounted.discountAmount
+        }
+
+        const totalPrice = discounted && discounted.discountedTotal ? discounted.discountedTotal : totalAmount
 
         let walletBalance = user.wallet || 0;
         let amountPayable = totalAmount;
@@ -74,22 +96,24 @@ const placeOrder = async (req, res) => {
 
 
         if (walletAmount>0 && walletBalance > 0) {
-            if (walletBalance >= totalAmount) {
-                console.log("I m in walletBalance >= totalAmount")
-                walletUsed = totalAmount;
+            //if (walletBalance >= totalAmount) {
+                if (walletBalance >= totalPrice) {
+                console.log("I m in walletBalance >= totalPrice with discounted it")
+                // walletUsed = totalAmount;
+                walletUsed =totalPrice;
                 amountPayable = 0;
-                console.log("Wallet used is : totalAmount",walletUsed)
+                console.log("Wallet used is : totalPrice",walletUsed)
             } 
             else {     
-                console.log("I m in walletBalance < totalAmount")
+                console.log("I m in walletBalance < totalPrice")
            
                 walletUsed = walletBalance;
-                amountPayable = totalAmount - walletBalance;
+                // amountPayable = totalAmount - walletBalance;
+                amountPayable = totalPrice - walletBalance;
                 // console.log("amountPayable : totalAmount - walletBalance",amountPayable)
 
             }
             console.log(walletAmount,walletUsed,amountPayable)
-
         }
       
         const generatedID = Math.floor(10000 + Math.random() * 900000);
@@ -126,7 +150,8 @@ const placeOrder = async (req, res) => {
                 state: address.state,
                 country: address.country,
             },
-            totalprice: totalAmount,
+            totalAmount : totalAmount,
+            totalprice: totalPrice,
             walletUsed : walletUsed,
             amountPayable : amountPayable,
             paymentMethod : paymentMethod,
@@ -137,7 +162,8 @@ const placeOrder = async (req, res) => {
         });
 
         const ordered = await order.save();
-      
+        console.log("Order palced")
+
         //update product quantity from cart data...
         for( const items of cart.items ){
             const { productId, quantity } = items
@@ -288,6 +314,7 @@ const getConfirmOrder = async (req, res,next) => {
             // }
         }
             console.log(lastOrder)
+
         res.render('user/order-complete', {
             order: lastOrder,
             products: lastOrder ? lastOrder.products : []

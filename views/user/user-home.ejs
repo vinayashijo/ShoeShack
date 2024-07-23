@@ -69,34 +69,13 @@
                                             <span class="old-price">₹<%= row.oldPrice %></span><br>
                                             <span class="discounted-price">₹<%= row.regularPrice %></span>
                                             <% if (row.discount) { %>
-                                                <div class="save-amount">Saved 5%</div>
+                                                <div class="save-amount">Saved (<%= row.discount  %>)</div>
                                             <% } %>
                                         </div>
                                         <div class="product-action-1 show">
                                             <button onclick="addToCart('<%= row._id %>')" class="action-btn hover-up"><i class="fi-rs-shopping-cart"></i></button>
                                         </div>
                                     </div>
-
-                                    <!-- <div class="product-content-wrap">
-                                        <div class="product-category">
-                                            <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
-                                        </div>
-                                        <h2><a href="/productdetails/<%= row._id %>"><%= row.productname %></a></h2>
-                                        <div class="rating-result" title="90%">
-                                            <span>
-                                                <span>90%</span>
-                                            </span>
-                                        </div>
-                                        <div class="product-price">
-                                            <span>₹<%= row.regularprice %></span>
-                                            <% if (row.discount) { %>
-                                                <span class="old-price"><%= row.discount %>%</span>
-                                            <% } %>
-                                        </div>
-                                        <div class="product-action-1 show">
-                                            <a aria-label="Add To Cart" class="action-btn hover-up" href="/addtocart"><i class="fi-rs-shopping-bag-add"></i></a>
-                                        </div>
-                                    </div> -->
                                 </a> 
                                 </div>
                             </div>

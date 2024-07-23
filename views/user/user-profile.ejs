@@ -1,11 +1,56 @@
 ﻿<%- include('../partials/userheader') %>
 <style>
-    .error {
-        color: red;
-    }
+
+.error {
+    color: red;
+}
+
+.pagination-area {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.pagination .page-item {
+    flex: 0 0 auto;
+}
+
+.pagination .page-link {
+    min-width: 40px;
+    text-align: center;
+}
+
 </style>
 <script>
 
+//pagination -- to avoid reloading ...
+document.querySelectorAll('.pagination-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = this.getAttribute('data-page');
+            alert(page)
+            fetchPage(page);
+        });
+    });
+
+function fetchPage(page) {
+        fetch(`/orders?page=${page}`)
+            .then(response => response.text())
+            .then(data => {
+                document.querySelector('#orders-content').innerHTML = data;
+                // Assuming orders tab has ID "orders-tab" and it's the second tab
+                document.querySelector('#orders-tab').click();
+            })
+            .catch(error => console.error('Error fetching page:', error));
+    }
+
+//pagination -- to avoid reloading ...
 function cancelOrder(oid){
     console.log("Inside cancel order !" + oid);
     Swal.fire({
@@ -238,7 +283,6 @@ function cancelOrder(oid){
     //tab settings
     
 
-    
     function validateForm(event) {
       event.preventDefault(); // Prevent form submission
     
@@ -427,8 +471,38 @@ function cancelOrder(oid){
                                 <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h5 class="mb-0">Your Orders</h5>
+                                            <h5 class="mb-0 text-secondary ">Your Orders</h5>
                                         </div>
+
+                                        <header class="card-header">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-12">
+                                                    <form action="/getprofile/#orders" class="d-flex">
+                                                        <div class="form-group me-2">
+                                                            <select class="form-control" name="sortData">
+                                                                <option value="trackingId">Order ID</option>
+                                                                <option value="userId.name">Name</option>
+                                                                <option value="orderDate">Date</option>
+                                                                <option value="totalPrice">Total</option>
+                                                                <option value="orderStatus">Order Status</option>
+                                                                <option value="paymentStatus">Payment Status</option>
+                                
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group me-2">
+                                                            <select class="form-control" name="sortOrder">
+                                                                <option value="asc">Ascending</option>
+                                                                <option value="desc">Descending</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <button class="btn btn-primary me-2 ">Sort</button>
+                                                        </div>
+                                                       
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </header>
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table" >
@@ -459,7 +533,7 @@ function cancelOrder(oid){
                                                                         <% } else if (item.orderStatus === 'Delivered') { %>
                                                                             <a onclick="cancelOrder('<%= item._id %>')"><button class="btn-small btn-danger">Return</button></a>
                                                                         <% } %>
-                                                                        <a href="/view-order-products/<%= item._id %>"><button class="btn-small btn-secondary">View</button></a>
+                                                                        <a href="/view-order-products/<%= item._id %>"><button class="btn-small btn-secondary ">View</button></a>
                                                                     </td>
                                                                 </tr>
                                                             <% }); %>
@@ -471,7 +545,58 @@ function cancelOrder(oid){
                                                     </tbody>
                                                 </table>
                                             </div>
+
                                         </div>
+
+                                         <!-- Pagination Section Begin -->
+                                         <div class="pagination-area mt-15 mb-50">
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-center">
+                                                    <% if (currentPage > 1) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=<%= prevPage %>#orders" data-page="<%= prevPage %>">
+                                                                <i class="material-icons md-chevron_left"></i>
+                                                            </a>
+                                                        </li>
+                                                    <% } %>
+                                                    <% if (currentPage > 2) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=1#orders" data-page="1">1</a>
+                                                        </li>
+                                                        <!-- <li class="page-item disabled"><span class="page-link">...</span></li> -->
+                                                    <% } %>
+                                                    <% if (currentPage > 1) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=<%= currentPage - 1 %>#orders" data-page="<%= currentPage - 1 %>"><%= currentPage - 1 %></a>
+                                                        </li>
+                                                    <% } %>
+                                                    <li class="page-item active">
+                                                        <span class="page-link"><%= currentPage %></span>
+                                                    </li>
+                                                    <% if (hasNextPage) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=<%= currentPage + 1 %>#orders" data-page="<%= currentPage + 1 %>"><%= currentPage + 1 %></a>
+                                                        </li>
+                                                    <% } %>
+                                                    <% if (nextPage !== lastPage && currentPage !== lastPage) { %>
+                                                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=<%= lastPage %>#orders" data-page="<%= lastPage %>"><%= lastPage %></a>
+                                                        </li>
+                                                    <% } %>
+                                                    <% if (currentPage !== lastPage) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link pagination-link" href="?page=<%= nextPage %>#orders" data-page="<%= nextPage %>">
+                                                                <i class="material-icons md-chevron_right"></i>
+                                                            </a>
+                                                        </li>
+                                                    <% } %>
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                                                                                       
+
+                                        <!-- Pagination Section End -->
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">

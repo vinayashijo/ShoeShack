@@ -16,23 +16,33 @@
                     </span><br>
                     <small class="text-muted">Order ID: <%= order.trackingId %></small>
                 </div>
-                <div class="col-lg-6 col-md-6 ms-auto text-md-end">
+                <div class="col-lg-6 col-md-6 ">
+                    <% if (order.paymentStatus === 'Failed') { %>
+                        <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                            Payment Status: <p class="text-danger"><%= order.paymentStatus %></p>
+                        </div>
+                        <% } %>
                     <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200" id="statusSelect">
+                        <% if (order.paymentStatus !== 'Failed') { %>
+
                         <% if (order.orderStatus === 'Pending') { %>
                             <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
                             <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
                             <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                         <% } else if(order.orderStatus === 'Confirmed') { %>
+                            <option value="Confirmed" <%= order.orderStatus === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
                             <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                             <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                             <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                         <% } else if(order.orderStatus === 'Shipped') { %>
+                            <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                             <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                             <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
                         <% } else if(order.orderStatus === 'Delivered') { %>
                             <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                         <% } else if(order.orderStatus === 'Cancelled') { %>
                             <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                        <% } %>
                         <% } %>
                     </select>
                     <a class="btn btn-primary" href="#" id="saveStatus">Save</a>
@@ -142,7 +152,7 @@
                                             </dl>
                                             <dl class="dlist">
                                                 <dt>Discounts/Coupons:</dt>
-                                                <dd>₹<%= order.discountAmount.toFixed(2) %></dd>
+                                                <dd><% if( order.discountAmount ) { %>- ₹ <%= order.discountAmount.toFixed(2) %> <% } else { %>₹ 0<% } %></dd>
                                             </dl>
                                             <dl class="dlist">
                                                 <dt>Shipping cost:</dt>

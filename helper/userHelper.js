@@ -18,6 +18,8 @@ const doSignUp = (userData, verify, emailVerify) => {
               const ownReferralCode = await module.exports.generateReferralCode();
 
               console.log(ownReferralCode)
+              console.log(password)
+
               let isreferred = false;
               let walletBalance = 0;
               let referredBy;
@@ -82,8 +84,11 @@ const doSignUp = (userData, verify, emailVerify) => {
                   resolve(response);
                 })
                 .catch((error) => {
+                  console.log(error)
                   reject(error);
                 });
+
+                console.log("user added successfully")
 
             } catch (error) {
               reject(error);

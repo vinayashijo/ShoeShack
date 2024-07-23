@@ -121,7 +121,6 @@ const getTopSoldProducts  = async () => {
   }
 }
 
-
 //create user function------------------------------------------------
 const CreateUser = async (req, res) => {
   try {
@@ -186,8 +185,10 @@ const loadproductdetailspage = async function (req, res) {
 //userlogin-----------------------------------------------------------------------------------------------
 const loaduserlogin = async (req, res) => {
   try {
+    console.log(req.body.email)
     const user = await userModel.findOne({ email: req.body.email });
-
+    console.log(user)
+    
     if (!user) {
       req.flash("errorMessage", "User does not exist");
       res.redirect("/userlogin");
@@ -352,14 +353,55 @@ const getUserProfile = async (req, res) => {
       user.walletHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
-    const userOrders = await orderModel
+    //users
+      let { sortData,sortOrder } = req.query;
+      const { search = '' } = req.query;
+      const limit = 5;
+
+      let page = Number(req.query.page);
+      if (isNaN(page) || page < 1) {                                  
+          page = 1;
+      }
+
+      if(!sortData)
+      {  
+        sortData = "orderDate"
+      }
+      const sort = {};
+      sort[sortData] =1
+
+      if (sortData) {
+          if (sortOrder === 'asc') {
+              sort[sortData] = 1;
+          } else {
+              sort[sortData] = -1;
+          }
+      }
+      console.log(sortData,sortOrder)
+      console.log(sort[sortData])
+      
+      const usersCount = await orderModel.find().count();
+      console.log("usersCount" ,usersCount);
+
+      const userOrders = await orderModel
       .find({ userId: req.session.user._id })
-      .sort({ orderDate: -1 });
-    console.log(userOrders);
+      .sort(sort)
+      .skip((page - 1) * paginationHelper.ORDER_PER_PAGE)
+      .limit(paginationHelper.ORDER_PER_PAGE)
+
     res.render("user/user-profile", {
       user: user,
       userorders: userOrders,
       moment,
+      currentPage : page,
+      hasNextPage : usersCount  >  page * paginationHelper.ORDER_PER_PAGE,
+      hasPrevPage : page > 1,
+      nextPage : page + 1,
+      prevPage: page - 1,
+      lastPage : Math.ceil(usersCount/ paginationHelper.ORDER_PER_PAGE),
+      search : search,
+      sortData: sortData,
+      sortOrder: sortOrder
     });
   } catch (error) {
     console.log("controller error", error);

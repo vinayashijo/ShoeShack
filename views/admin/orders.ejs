@@ -8,7 +8,35 @@
     </div>
     <div class="card mb-4">
         <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-12">
+                    <form action="/orders" class="d-flex">
+                        <div class="form-group me-2">
+                            <select class="form-control" name="sortData">
+                                <option value="trackingId">Order ID</option>
+                                <option value="userId.name">Name</option>
+                                <option value="orderDate">Date</option>
+                                <option value="totalPrice">Total</option>
+                                <option value="orderStatus">Order Status</option>
+                                <option value="paymentStatus">Payment Status</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group me-2">
+                            <select class="form-control" name="sortOrder">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary me-2">Sort</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+        <header class="card-header">
             <div class="row gx-3 align-items-center">
+
+
                 <form action="/orders" method="GET" class="d-flex" id="searchForm">
                     <div class="col-lg-4 col-md-6 m-2">
                         <input type="text" name="search" placeholder="Search..." class="form-control" value="<%= search %>">
@@ -37,8 +65,8 @@
                             <% orders.forEach(order => { %>
                             <tr>
                                 <td><a href="#" class="fw-bold">#<%= order.trackingId %></a></td>
-                                <td><%= order.userId.name %></td>
-                                <td><%= moment(order.orderDate).format(shortDateFormat) %></td>
+                                <td><%= order?.userId?.name %></td> 
+                                <td><%= order.orderDate %></td>
                                 <td>₹<%= order.totalprice.toFixed(2) %></td>
                                 <td><i class="material-icons md-payment font-xxl text-muted mr-5"></i> <%= order.orderStatus %></td>
                                 <td><span class="badge badge-pill badge-soft-success"><%= order.paymentStatus %></span></td>

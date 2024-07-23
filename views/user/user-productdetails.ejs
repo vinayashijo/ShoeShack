@@ -3,11 +3,8 @@
 <script>
 async function addToWishlist(productId) {
     try {
-        alert(productId)
-        // const response = await axios.post('/addtowishlist', { productId });
 
         const response =  await axios.post('/addtowishlist', { productId });
-        // alert(response)
 
         if (!response.data.login) {
             return window.location.href = '/userlogin';
@@ -20,9 +17,9 @@ async function addToWishlist(productId) {
                 confirmButtonColor: '#28a745'
             }).then((result) => 
             {
-                            if (result.isConfirmed) {
-                                window.location.href = '/viewwishlist'; // Redirect to the viewcart page
-                            }
+                if (result.isConfirmed) {
+                    window.location.href = '/viewwishlist'; // Redirect to the viewcart page
+                }
             });
         }
         else if (response.status === 409) {

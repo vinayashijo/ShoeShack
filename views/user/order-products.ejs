@@ -280,7 +280,7 @@
                   >Retry Payment</a
                 >
               </div>
-              <% } else {  %>
+              <% } else if(order.status === 'Delivered') {  %>
                 <div>           
                     <button id="viewInvoice" data-order="<%= JSON.stringify(order) %>"  class="btn btn-primary">Invoice</button>
                 </div>
@@ -472,10 +472,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.getElementById("retryPay").addEventListener("click", function () {
-    console.log("hi");
+    // console.log("hi");
     const order = JSON.parse(this.getAttribute("data-retryorder"));
 
-    console.log(order);
+    // console.log(order);
 
     if (order) {
       const paymentMethod = order.paymentMethod;
