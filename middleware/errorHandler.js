@@ -31,13 +31,13 @@ module.exports = (err, req, res, next) => {
   
     if (res.headersSent) 
     {
-        console.log("going to next in error handler")
+        // console.log("going to next in error handler")
         return next(err);
     }
-    console.log("err.status " ,err.status)
+    // console.log("err.status " ,err.status)
 
     if (err.status === 404) {
-        console.log("err.status  ==404")
+         console.log("err.status  ==404")
       return res.status(404).render('error/404', { error : err ,message: err.message });
     }
   

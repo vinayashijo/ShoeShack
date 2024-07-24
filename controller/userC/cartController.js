@@ -26,7 +26,7 @@ const getcart = async (req, res,next) => {
             let discountAmount =0;
              totalPrice = cartData.totalPrice
             
-            console.log("totalPrice",totalPrice)
+            // console.log("totalPrice",totalPrice)
 
             if(!coupon){
                     discountAmount =0,
@@ -135,7 +135,7 @@ const addToCart = async (req, res,next) => {
 
 const viewcart = async (req, res,next) => {
     try {
-            console.log("I m in viewcart")
+            // console.log("I m in viewcart")
             // Find the cart for THE user LOGGED and populate cart ALL DETAILS
             const cartData = await cartModel.findOne({ userId: req.session.user._id }).populate('items.productId');
             let discountAmount = 0
@@ -207,12 +207,10 @@ const viewcart = async (req, res,next) => {
 const deCart = async (req, res,next) => {
     try {
 
-        console.log("im in decart")
+        // console.log("im in decart")
         const userId = req.session.user._id;
         const productId = req.body.productId; // Accessing productId sent via fetch
-        console.log(userId,productId)
         const result = await cartHelper.removeProduct(userId, productId);
-        // console.log("{success,message} " , result)
 
         req.session.productCount = (req.session.productCount ) ?  (req.session.productCount ||0) - 1 : 0
        res.json(result);

@@ -73,10 +73,10 @@ regform.addEventListener('submit', function (e) {
   namevalidate();
   mobvalidate();
 
-  console.log('After validation');
+  // console.log('After validation');
 
   if (error1.innerHTML || error4.innerHTML || error3.innerHTML || error5.innerHTML ) {
-    console.log('Validation failed');
+    // console.log('Validation failed');
     e.preventDefault();
 
     Toastify({
@@ -90,7 +90,7 @@ regform.addEventListener('submit', function (e) {
     // errorMessage.innerText = 'Please correct the errors in the form.';
     // errorMessage.style.color = 'red';
   } else {
-    console.log('Validation passed');
+    // console.log('Validation passed');
     this.submit();
   }
 });

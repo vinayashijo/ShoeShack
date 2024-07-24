@@ -68,7 +68,7 @@ const updateQuantities = async (userId, productId, action) => {
         if (itemIndex === -1) {
             return { success: false, message: 'Item not found in cart' };
         }
-        console.log("Cart - itemIndex:", itemIndex);
+        // console.log("Cart - itemIndex:", itemIndex);
 
         // Extract the item and product details
         const item = cart.items[itemIndex];
@@ -79,7 +79,7 @@ const updateQuantities = async (userId, productId, action) => {
 
         // Calculate the new quantity
         const newQuantity = item.quantity + action;
-        console.log("Current quantity:", item.quantity, "New quantity:", newQuantity, "Product stock:", product.stock);
+        // console.log("Current quantity:", item.quantity, "New quantity:", newQuantity, "Product stock:", product.stock);
 
         // Validate the new quantity
         if (newQuantity > 5) {
@@ -89,13 +89,13 @@ const updateQuantities = async (userId, productId, action) => {
         // Update quantity and price if within valid range
         if (newQuantity > 0 && newQuantity <= product.stock) {
             item.quantity = newQuantity;
-            console.log(item.quantity)
+            // console.log(item.quantity)
 
             item.price = (product.regularPrice - (product.regularPrice * (product.discount / 100))).toFixed(2);
             cart.totalPrice = calculateTotalPricefromItems(cart.items);
 
             await cart.save();
-            console.log("Updated cart saved. Total price:", cart.totalPrice);
+            // console.log("Updated cart saved. Total price:", cart.totalPrice);
 
             return { success: true, message: 'Quantity updated successfully', newQuantity: item.quantity };
         } else if (newQuantity <= 0) {
@@ -116,7 +116,7 @@ const updateQuantities = async (userId, productId, action) => {
 
 const removeProduct = async (userId, productId) => {
     try {
-        console.log("removeProduct - userId, productId" ,userId, productId )
+        // console.log("removeProduct - userId, productId" ,userId, productId )
         // find by userid - getting the cart data... vv
         const cart = await cartModel.findOne({ userId });
 
@@ -137,7 +137,7 @@ const removeProduct = async (userId, productId) => {
 
         
         await cart.save();
-        console.log("saved balance cart items")
+        // console.log("saved balance cart items")
 
         return { success: true, message: 'Product removed from cart' };
     } catch (error) {

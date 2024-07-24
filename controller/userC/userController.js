@@ -12,7 +12,7 @@ const bcrypt = require("bcrypt");
 const moment = require("moment");
 
 const indexpage = function (req, res) {
-  console.log("index");
+  // console.log("index");
   //http://localhost:3000/indexpage
   res.render("user/index-4", {});
 };
@@ -30,7 +30,7 @@ const loadregister = function (req, res) {
 //home page or user dashboard---------------------------------------------------------
 const loadhome = async function (req, res, next) {
   try {
-    console.log("loadhome");
+    // console.log("loadhome");
     if (req.session.user) {
       const userId = req.session.user._id; // Assuming req.session.user contains the user's ID
       const user = await userModel.findById(userId);
@@ -38,7 +38,7 @@ const loadhome = async function (req, res, next) {
       if (!user.isActive) {
         req.session.user = null;
 
-        res.redirect("/userlogin"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
+        res.redirect("/"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
       }
 
        //cart notifications
@@ -124,8 +124,8 @@ const getTopSoldProducts  = async () => {
 //create user function------------------------------------------------
 const CreateUser = async (req, res) => {
   try {
-    console.log("Request Entered to insertUser");
-    console.log(req.body.confirmPassword);
+    // console.log("Request Entered to insertUser");
+    // console.log(req.body.confirmPassword);
 
     const response = await userHelper.doSignUp(
       req.body,
@@ -144,34 +144,22 @@ const CreateUser = async (req, res) => {
 //productdetailspage rendering-----------------------------------------------------------------------
 const loadproductdetailspage = async function (req, res) {
   try {
-    console.log("In productDetails ");
+    // console.log("In productDetails ");
     const id = req.params.id;
     const data = await productModel.findOne({ _id: id }).populate("category");
     const doc = await productModel.find({ category: data.category });
 
-    // const userId = req.session.user._id; // Assuming req.session.user contains the user's ID
-    // const user = await userModel.findById(userId);
-    // if (user) {
-    //   if (!user.isActive) {
-    //     req.session.user = null;
-    //     res.redirect("/userlogin"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
-    //   }
+    if (req.session.user) {
+      const userId = req.session.user._id; // Assuming req.session.user contains the user's ID
+      const user = await userModel.findById(userId);
 
-    //   const cartlist = await cartModel.findOne({ userId: userId });
-    //   if (cartlist) {
-    //     req.session.productCount = cartlist.items.length || 0;
-    //     console.log("cartCount", req.session.productCount);
-    //   }
+      if (!user.isActive) {
+        req.session.user = null;
+        res.redirect(`/productdetails/${id}` ); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
+      }
+    }
 
-    //   const wishlist = await wishlistModel.find({ userId: userId });
-    //   let wishlistCount = 0;
-    //   if (wishlist) {
-    //     req.session.wishlistCount = wishlist.items.length || 0;
-    //     console.log("wishlistCount", req.session.wishlistCount);
-    //   }
-    // }
-
-    res.render("user/user-productdetails", {
+   res.render("user/user-productdetails", {
       data: data,
       user: req.session.user,
       doc: doc,
@@ -185,7 +173,7 @@ const loadproductdetailspage = async function (req, res) {
 //userlogin-----------------------------------------------------------------------------------------------
 const loaduserlogin = async (req, res) => {
   try {
-    console.log(req.body.email)
+    // console.log(req.body.email)
     const user = await userModel.findOne({ email: req.body.email });
     // console.log(user)
     
@@ -215,22 +203,22 @@ const loaduserlogin = async (req, res) => {
 
 const loadshop = async function (req, res) {
   try {
-    console.log(" iN loadshop");
+    // console.log(" iN loadshop");
     if (req.session.user) {
       const userId = req.session.user._id; // Assuming req.session.user contains the user's ID
       const user = await userModel.findById(userId);
 
       if (!user.isActive) {
-        console.log("!user.isActive", user.isActive);
+        // console.log("!user.isActive", user.isActive);
 
         req.session.user = null;
-        res.redirect("/userlogin"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
+        res.redirect("/usershop"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
       }
     }
 
     const { cat, search, sort, hideOutOfStock, page = 1 } = req.query;
-    console.log("search", search);
-    console.log("cat", cat);
+    // console.log("search", search);
+    // console.log("cat", cat);
 
     let pageNumber = Number(page);
     if (isNaN(pageNumber) || pageNumber < 1) {
@@ -243,7 +231,7 @@ const loadshop = async function (req, res) {
     }
 
     if (search) {
-      console.log(search);
+      // console.log(search);
 
       condition.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -313,7 +301,7 @@ const loadshop = async function (req, res) {
     //notification cart count
     req.session.productCount = cartCount;
 
-    console.log("req.session.productCount", req.session.productCount);
+    // console.log("req.session.productCount", req.session.productCount);
 
     res.render("user/index-4", {
       data,
@@ -377,12 +365,9 @@ const getUserProfile = async (req, res) => {
               sort[sortData] = -1;
           }
       }
-      console.log(sortData,sortOrder)
-      console.log(sort[sortData])
-      
+    
       const usersCount = await orderModel.find().count();
-      console.log("usersCount" ,usersCount);
-
+    
       const userOrders = await orderModel
       .find({ userId: req.session.user._id })
       .sort(sort)
@@ -411,7 +396,7 @@ const getUserProfile = async (req, res) => {
 
 const depositWallet = async (req, res) => {
   try {
-    console.log("I m in depositWallet ");
+    // console.log("I m in depositWallet ");
     const amount = parseFloat(req.body.amt);
     const razorpay_payment_id = req.body.razorpay_payment_id;
 
@@ -424,7 +409,7 @@ const depositWallet = async (req, res) => {
     }
 
     const now = moment().toISOString();
-    console.log(amount, new Date());
+    // console.log(amount, new Date());
 
     const user = await userModel.findById(userId);
     if (!user) {
@@ -450,7 +435,7 @@ const depositWallet = async (req, res) => {
       }
     );
 
-    console.log("done");
+    // console.log("done");
     // res.redirect('getprofile');
 
     res
@@ -484,7 +469,7 @@ const resetPassword = async (req, res) => {
         .json({ success: false, message: "New passwords do not match" });
     }
 
-    console.log(password, npassword, cpassword);
+    // console.log(password, npassword, cpassword);
 
     const user = await userModel.findOne({ _id: req.session.user._id });
     if (!user) {
@@ -493,7 +478,7 @@ const resetPassword = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    console.log(password, user.password);
+    // console.log(password, user.password);
 
     const isMatch = await verifyPassword(password, user.password);
     if (!isMatch) {
@@ -605,7 +590,7 @@ const saveProfile = async (req, res) => {
 const getAdd_Address = (req, res) => {
   // const isMaster  =  req.params.isM ? 1 : 0
 
-  console.log("AddAddress");
+  // console.log("AddAddress");
   // res.render(`user/add-address/${isMaster}`)
 
   res.render("user/add-address");
@@ -613,7 +598,7 @@ const getAdd_Address = (req, res) => {
 
 const getAddress = async (req, res) => {
   try {
-    console.log("getAddress body:", req.body);
+    // console.log("getAddress body:", req.body);
     const user = await userModel.find({ _id: req.session.user._id });
 
     res.render("user/shop-checkout", {
@@ -687,7 +672,7 @@ const orderaddAddress = async (req, res) => {
       { $push: { address: address } }
     );
 
-    console.log("Address update result:", result);
+    // console.log("Address update result:", result);
     res.redirect("/checkout"); //redirect to the profile page after succes removal
     // res.redirect('/getprofile');
   } catch (error) {
@@ -698,17 +683,14 @@ const orderaddAddress = async (req, res) => {
 
 const getEditAddress = async (req, res) => {
   try {
-    console.log("getEditAddress");
+    // console.log("getEditAddress");
     const addressId = req.params.id;
     const userId = req.session.user._id;
-    console.log(addressId);
-    // console.log(userId)
-    // const address=await addressSchema.findOne({_id:addressId})
-
+   
     const user = await userModel.findOne({ _id: userId });
     const address = user?.address.filter((x) => x._id == addressId);
     // console.log(user)
-    console.log(address);
+    // console.log(address);
     res.render("user/edit-address", { address: address[0] });
   } catch (error) {
     // res.redirect('/500')
@@ -720,7 +702,7 @@ const editAddress = async (req, res) => {
   // console.log("save editAddress");
   const addressId = req.params.id;
   const userId = req.session.user._id;
-  console.log(addressId, userId);
+  // console.log(addressId, userId);
 
   try {
     const {
@@ -733,16 +715,16 @@ const editAddress = async (req, res) => {
       state,
       country,
     } = req.body;
-    console.log(
-      name,
-      mobile,
-      pincode,
-      houseName,
-      cityOrTown,
-      district,
-      state,
-      country
-    );
+    // console.log(
+    //   name,
+    //   mobile,
+    //   pincode,
+    //   houseName,
+    //   cityOrTown,
+    //   district,
+    //   state,
+    //   country
+    // );
 
     const user = await userModel.findOneAndUpdate(
       { _id: userId, "address._id": addressId },
@@ -761,7 +743,7 @@ const editAddress = async (req, res) => {
       { new: true } //its good to get the updated doc right after the update itself vv
     );
 
-    console.log("Saved");
+    // console.log("Saved");
 
     if (!user) {
       return res.status(404).send("User or address not found");
@@ -781,7 +763,7 @@ const removeAddress = async (req, res) => {
   try {
     const addressId = req.params.id; // The ID of the address to be removed
     const userId = req.session.user._id; // The ID of the user
-    console.log(addressId);
+    // console.log(addressId);
     // Find the user and remove the address with the specified ID
     const user = await userModel.findByIdAndUpdate(
       { _id: userId },

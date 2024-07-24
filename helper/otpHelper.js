@@ -37,9 +37,6 @@ const sendOtp = async (req, res) => {
         .json({ error: "Invalid or missing email address" });
     }
 
-console.log(process.env.User_EMAIL)
-console.log(userEmail)
-
     const mailOptions = {
       from:process.env.User_EMAIL,
       to: userEmail ?? process.env.User_EMAIL,
@@ -48,7 +45,7 @@ console.log(userEmail)
     };
 
  
-    console.log(mailOptions);
+    // console.log(mailOptions);
 
     transporter.sendMail(mailOptions, (error) => {
       // console.log("1st")
@@ -61,7 +58,7 @@ console.log(userEmail)
     });
       
     req.session.otp = otp;
-    console.log(otp)
+    // console.log(otp)
     
     res.json({ success:true,message: "OTP Sent To Your Email ! Check it " });
   } catch (error) {
@@ -75,24 +72,21 @@ const verify =  async (req, res) => {
   
     const sendedOtp = req.session.otp;
     const verifyOtp = req.body.otp;
-    console.log(sendedOtp);
-    console.log(verifyOtp);    
-    console.log("started checking");
-
+  
     if (sendedOtp === verifyOtp) {
 
       if(Date.now() < req.session.otpExpiry){
-        console.log("otp Entered before time expires")
+        // console.log("otp Entered before time expires")
       req.session.otpmatched = true;
       res.json({ status: true, message: "otp verified" });
       }else{
-        console.log("failed otp verification")
+        // console.log("failed otp verification")
         req.session.otpmatched = false;
         res.json({ status: false, message: "failed" });
       }
     
     } else {
-      console.log("verification fails")
+      // console.log("verification fails")
       req.session.otpmatched = false;
       res.json({ status: false, message: "failed" });
     }

@@ -77,7 +77,7 @@ const loadaddProductPage = async(req,res)=>{
           res.redirect("/adminlogin")
       }
     }catch (error) { 
-      console.log("error in add products "+error)  
+      // console.log("error in add products "+error)  
       next(error);
     }
 }
@@ -228,17 +228,14 @@ const productupdate = async (req, res) => {
             }
 
         if (!duplicate || duplicate._id.toString() === id) {
-             
-            // console.log(data.oldPrice)
-            // console.log("regularPrice" , data.oldPrice, parseFloat(data.discount * .01 ))
-            // data.oldPrice = data.regularPrice
+            
             const discountPrice =  data.oldPrice  * parseFloat(data.discount * .01 )
-            console.log(discountPrice)
+            // console.log(discountPrice)
             const oldPrice = data.oldPrice
             const regularPric = parseFloat(data.oldPrice )- parseFloat(discountPrice)
 
-            console.log(oldPrice)
-            console.log(regularPric)
+            // console.log(oldPrice)
+            // console.log(regularPric)
 
             await productModel.findByIdAndUpdate(
                 id,
@@ -265,7 +262,7 @@ const productupdate = async (req, res) => {
                     { "items.productId": product._id },
                     { $set: { "items.$.price": regularPric } }
                   );
-                  console.log("cart price updated")
+                  // console.log("cart price updated")
                         
             }
   

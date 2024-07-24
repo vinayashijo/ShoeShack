@@ -302,7 +302,7 @@ const getAdminOrderList = async (req, res) => {
 const changeOrderStatus = async (req, res) => {
   // Define allowed transitions
 
-  console.log("i m in changeOrderStatus")
+  // console.log("i m in changeOrderStatus")
   const allowedTransitions = {
     'Pending': ['Confirmed', 'Cancelled'],
     'Confirmed': ['Shipped', 'Delivered'],

@@ -150,7 +150,7 @@ const getSalesReport = async (req, res) => {
       // console.log("order.items", order.items);
 
       for (const item of order.items) {
-        console.log("i m in orders items");
+        // console.log("i m in orders items");
 
         if (productObj[item.productId]) {
           productObj[item.productId]++;

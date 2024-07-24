@@ -107,7 +107,7 @@ const doSignUp = (userData, verify, emailVerify) => {
           resolve(response);
         }
       } else {
-        console.log("User already exists")
+        // console.log("User already exists")
 
         const response = { status: false, message: "User already exists" };
         resolve(response);

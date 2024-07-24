@@ -61,7 +61,7 @@ const loadcustomermanagement = async (req, res) => {
     );
 
   } catch (error) {
-    console.log("Error in customer management:", error);
+    // console.log("Error in customer management:", error);
     res.status(500).send("Internal Server Error");
   }
 }

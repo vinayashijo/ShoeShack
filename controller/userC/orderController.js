@@ -38,7 +38,7 @@ const getCheckout = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        console.log("i m in place order")
+        // console.log("i m in place order")
         const { addressId, paymentMethod, walletAmount } = req.body;
         const userId = req.session.user._id;
 
@@ -73,16 +73,15 @@ const placeOrder = async (req, res) => {
         let discounted= {};
         if( cart && cart.coupon && totalAmount > 0 ) {
             discounted = await couponHelper.discountPrice( cart.coupon, totalAmount )
-            console.log(discounted)
 
             await couponModel.updateOne({ _id : cart.coupon},{
                 $push : {
                     users : user
                 }
             })
-            console.log("couponModel users added")
+            // console.log("couponModel users added")
         }   
-        console.log(discounted)  //{discountAmount,discountedTotal ->(totalamt-discount )}
+        // console.log(discounted)  //{discountAmount,discountedTotal ->(totalamt-discount )}
         if(discounted.discountAmount>0){
             discountAmount=discounted.discountAmount
         }
@@ -98,22 +97,13 @@ const placeOrder = async (req, res) => {
         if (walletAmount>0 && walletBalance > 0) {
             //if (walletBalance >= totalAmount) {
                 if (walletBalance >= totalPrice) {
-                console.log("I m in walletBalance >= totalPrice with discounted it")
-                // walletUsed = totalAmount;
                 walletUsed =totalPrice;
                 amountPayable = 0;
-                // console.log("Wallet used is : totalPrice",walletUsed)
             } 
             else {     
-                // console.log("I m in walletBalance < totalPrice")
-           
                 walletUsed = walletBalance;
-                // amountPayable = totalAmount - walletBalance;
                 amountPayable = totalPrice - walletBalance;
-                // console.log("amountPayable : totalAmount - walletBalance",amountPayable)
-
             }
-            // console.log(walletAmount,walletUsed,amountPayable)
         }
       
         const generatedID = Math.floor(10000 + Math.random() * 900000);
@@ -162,7 +152,7 @@ const placeOrder = async (req, res) => {
         });
 
         const ordered = await order.save();
-        console.log("Order palced")
+        // console.log("Order palced")
 
         //update product quantity from cart data...
         for( const items of cart.items ){
@@ -205,7 +195,7 @@ const placeOrder = async (req, res) => {
             }
             else
             {
-                console.log("COD") 
+                // console.log("COD") 
                 return res.json({ payment :  "COD" , success : true})
 
             }
@@ -239,10 +229,9 @@ const placeOrder = async (req, res) => {
 //razorpay confirm page
 const getConfirmOrder = async (req, res,next) => {
     try {
-        console.log("I m in getConfirmOrder ")
+        // console.log("I m in getConfirmOrder ")
         const { user } = req.session;
         const { status } = req.params;
-        console.log("STATUS",status )
 
         const lastOrder = await orderModel.findOne({ userId: user._id })
             .sort({ orderDate: -1 })
@@ -251,12 +240,10 @@ const getConfirmOrder = async (req, res,next) => {
         if (lastOrder) {
             if(status== 0)
             {
-                console.log("paymentStatus==Failed")
                 await orderModel.updateOne(
                     { _id: lastOrder._id },
                     { $set: { orderStatus: 'Confirmed', paymentStatus: 'Failed' } }
                 );
-                console.log("lastOrder.orderStatus === 'Pending && paymentStatus === 'failed ,make both status as Failed");
                 lastOrder.orderStatus = 'Confirmed';
                 lastOrder.paymentStatus = 'Failed';
             }
@@ -333,12 +320,8 @@ const confirmOrder = async (req, res) => {
     try {
         // Simulate payment verification logic with Razorpay (replace with actual verification)
         const paymentVerified = true; // Assume payment verification succeeded
-        console.log('Payment verification result:', paymentVerified);
-
         if (paymentVerified) {
             const { user } = req.session;
-
-            // await cartHelper.totalCartPrice(user);
 
             const lastOrder = await orderModel.findOne({ userId: user })
                 .sort({ orderDate: -1 })
@@ -351,8 +334,7 @@ const confirmOrder = async (req, res) => {
                 // console.log(lastOrder)
             if (lastOrder) {
                 // Check if both order and payment statuses are 'Pending'
-                console.log(lastOrder.orderStatus ,  lastOrder.paymentStatus)
-
+                // console.log(lastOrder.orderStatus ,  lastOrder.paymentStatus)
 
                 if (lastOrder.orderStatus === 'Pending' && lastOrder.paymentStatus === 'Pending') {
                     // Update both statuses to 'Confirmed'
@@ -362,7 +344,8 @@ const confirmOrder = async (req, res) => {
                     );
                     lastOrder.orderStatus = 'Confirmed';
                     lastOrder.paymentStatus = 'Confirmed';
-                } else {
+                } 
+                else {
                     // Handle other scenarios (e.g., payment failed, statuses already updated)
                     // This block will execute if either status is not 'Pending'
                     console.log('Order or payment status is not Pending');
@@ -414,8 +397,8 @@ const getInvoice = async(req,res) => {
     try {
         const { id } = req.params; // Extract
 
-        console.log("I m in Invoice")
-        console.log(id)
+        // console.log("I m in Invoice")
+        // console.log(id)
 
         const order = await orderModel.findOne({ _id: id }).sort({ orderDate: -1 }).populate({
             path: 'items.product',
@@ -560,16 +543,8 @@ const getSalesReport = async (req, res) => {
             sort['orderDate'] = sortOrder === "Ascending" ? 1 : -1;
         }
 
-        // console.log(conditions)
-        // console.log(sort)
-
         const orders = await orderModel.find(conditions).sort(sort);
-
-        console.log("Delivered Orders" ,orders)
-
         const overallSalesCount = orders.length;
-        console.log(overallSalesCount)
-
         let overallOrderAmount = 0;
         let overallDiscountAmount = 0;
 
@@ -577,9 +552,6 @@ const getSalesReport = async (req, res) => {
             overallOrderAmount += order.totalPrice;
             overallDiscountAmount += order.discountAmount || 0;
         }
-
-        // console.log(overallOrderAmount)
-        // console.log(overallDiscountAmount)
 
         let page = Number(req.query.page);
         if (isNaN(page) || page < 1) {
@@ -593,8 +565,7 @@ const getSalesReport = async (req, res) => {
             .skip((page - 1) * paginationHelper.SALES_PER_PAGE)
             .limit(limit);
 
-        console.log(filteredOrders)
-        
+        // console.log(filteredOrders)  
         res.render('admin/sale-report', {
             admin: true,
             moment,
@@ -630,9 +601,7 @@ const getAdd_Address = (req,res)=>{
 
 const addAddress = async (req, res) => {
     try {
-    //   console.log('Request body:', req.body); // Log the request body to debug
-      console.log('Session user ID:', req.session.user ? req.session.user._id : 'No session user'); // Log session user ID
-  
+   
       if (!req.session.user) {
         res.status(401).send('Unauthorized: No session user');
         return;
@@ -654,7 +623,7 @@ const addAddress = async (req, res) => {
         { $push: { address: address } }
       );
   
-      console.log('Address update result:', result);
+    //   console.log('Address update result:', result);
   
       res.redirect('/checkout');
     } catch (error) {

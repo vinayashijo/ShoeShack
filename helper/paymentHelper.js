@@ -16,9 +16,7 @@ const createRazorpayOrder = async (orderId,totalPrice, currency = 'INR') => {
         };
 
         const order = await razorpayInstance.orders.create(options);
-        
-        console.log("succefully created order using razorPay",order)
-
+      
         return order;
     } catch (error) {
         console.error('Error creating Razorpay order:', error);
