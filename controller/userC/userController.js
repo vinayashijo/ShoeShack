@@ -53,7 +53,7 @@ const loadhome = async function (req, res, next) {
       }
 
       req.session.productCount = cartlistCount || 0;
-      console.log("productCount", req.session.productCount);
+      // console.log("productCount", req.session.productCount);
 
       //cart notifications
 
@@ -69,7 +69,7 @@ const loadhome = async function (req, res, next) {
         }
       }
       req.session.wishlistCount = wishlistCount || 0;
-      console.log("wishlistCount", req.session.wishlistCount);
+      // console.log("wishlistCount", req.session.wishlistCount);
 
       //wishlist notifications
     }
@@ -187,7 +187,7 @@ const loaduserlogin = async (req, res) => {
   try {
     console.log(req.body.email)
     const user = await userModel.findOne({ email: req.body.email });
-    console.log(user)
+    // console.log(user)
     
     if (!user) {
       req.flash("errorMessage", "User does not exist");

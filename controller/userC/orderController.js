@@ -102,10 +102,10 @@ const placeOrder = async (req, res) => {
                 // walletUsed = totalAmount;
                 walletUsed =totalPrice;
                 amountPayable = 0;
-                console.log("Wallet used is : totalPrice",walletUsed)
+                // console.log("Wallet used is : totalPrice",walletUsed)
             } 
             else {     
-                console.log("I m in walletBalance < totalPrice")
+                // console.log("I m in walletBalance < totalPrice")
            
                 walletUsed = walletBalance;
                 // amountPayable = totalAmount - walletBalance;
@@ -113,7 +113,7 @@ const placeOrder = async (req, res) => {
                 // console.log("amountPayable : totalAmount - walletBalance",amountPayable)
 
             }
-            console.log(walletAmount,walletUsed,amountPayable)
+            // console.log(walletAmount,walletUsed,amountPayable)
         }
       
         const generatedID = Math.floor(10000 + Math.random() * 900000);
@@ -197,7 +197,7 @@ const placeOrder = async (req, res) => {
                                 }
                             }
                     })
-                    console.log("updated wallet amount",walletUsed) 
+                    // console.log("updated wallet amount",walletUsed) 
 
                     let  payment  = "WalletRazorPay"
               
