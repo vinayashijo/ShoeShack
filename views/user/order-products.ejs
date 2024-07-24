@@ -325,7 +325,7 @@
 document.addEventListener('DOMContentLoaded', function() {    
     document.getElementById('viewInvoice').addEventListener('click', function() {
         const order = JSON.parse(this.getAttribute('data-order'));   //check in the button there is an attribute :- data-order which has data i linked to 
-          console.log("Order Data:", order); 
+          // console.log("Order Data:", order); 
 
         const { jsPDF } = window.jspdf;
         // Initialize jsPDF correctly
@@ -478,8 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (order) {
       const paymentMethod = order.paymentMethod;
-      console.log(order);
-      console.log("order.paymentStatus", order.paymentStatus);
+      // console.log(order);
+      // console.log("order.paymentStatus", order.paymentStatus);
       if (paymentMethod === "Razorpay" && order.paymentStatus == "Failed") {
         console.log("order.paymentStatus :Failed");
         razorpayPayment(order);

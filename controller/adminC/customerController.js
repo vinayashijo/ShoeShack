@@ -4,13 +4,13 @@ const paginationHelper=require('../../helper/paginationHelper')
 //customer or user page mangement--------------------------------------------
 const loadcustomermanagement = async (req, res) => {
   try {
-    console.log("load customermanagement")
+    // console.log("load customermanagement")
 
     let { sortData,sortOrder } = req.query;
     const { search = '' } = req.query;
     const limit = 10;
 
-    console.log(req.query)
+    // console.log(req.query)
 
     let page = Number(req.query.page);
     if (isNaN(page) || page < 1) {                                  

@@ -51,7 +51,7 @@ const loadaddToCategory = async(req,res)=>{
 //list&unlist function-----------------------------------------------------
 const loadunlistorlist = async (req, res) => {
   try {
-      console.log("req for list or unlist");
+      // console.log("req for list or unlist");
       const id = req.query.id;
       console.log("/////" + id);
       const category = await categoryModel.findById(id);

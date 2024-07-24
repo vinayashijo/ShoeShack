@@ -7,7 +7,7 @@ const moment =require("moment")
 const getcart = async (req, res,next) => {
     try {
         const userId = req.session.user._id;
-        console.log("im in getcart")
+        // console.log("im in getcart")
         let discountAmount
         let discountTotal
         const cartData = await cartHelper.getcart(userId);
@@ -43,7 +43,7 @@ const getcart = async (req, res,next) => {
                 console.log("discountAmount : fixed",discountAmount)
             }
 
-            console.log("totalPrice",totalPrice)
+            // console.log("totalPrice",totalPrice)
             const discountedTotal = totalPrice-discountAmount;
             
         }
@@ -60,7 +60,7 @@ const getcart = async (req, res,next) => {
 };
 
 const addToCart = async (req, res,next) => {
-    console.log("I am in addtoCart Controller");
+    // console.log("I am in addtoCart Controller");
     try {
             const { productId} = req.body;
                        
@@ -111,7 +111,7 @@ const addToCart = async (req, res,next) => {
                 cart.totalPrice  = totalPriceCalculated
                 await cart.save();
 
-                console.log(cart.items.length)
+                // console.log(cart.items.length)
 
                 req.session.productCount  = cart.items.length
                 // console.log("cart.save(),saved sucess")
@@ -212,7 +212,7 @@ const deCart = async (req, res,next) => {
         const productId = req.body.productId; // Accessing productId sent via fetch
         console.log(userId,productId)
         const result = await cartHelper.removeProduct(userId, productId);
-        console.log("{success,message} " , result)
+        // console.log("{success,message} " , result)
 
         req.session.productCount = (req.session.productCount ) ?  (req.session.productCount ||0) - 1 : 0
        res.json(result);

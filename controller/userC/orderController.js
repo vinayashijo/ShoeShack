@@ -268,7 +268,7 @@ const getConfirmOrder = async (req, res,next) => {
                     { $set: { orderStatus: 'Confirmed', paymentStatus: 'Success' } }
                 );
 
-                console.log("lastOrderorderStatus = Confirmed ,lastOrder.paymentStatus = Failed" )
+                // console.log("lastOrderorderStatus = Confirmed ,lastOrder.paymentStatus = Failed" )
 
                 lastOrder.orderStatus = 'Confirmed';
                 lastOrder.paymentStatus = 'Success';
@@ -313,7 +313,7 @@ const getConfirmOrder = async (req, res,next) => {
             //     }
             // }
         }
-            console.log(lastOrder)
+            // console.log(lastOrder)
 
         res.render('user/order-complete', {
             order: lastOrder,
@@ -348,7 +348,7 @@ const confirmOrder = async (req, res) => {
                 })
                 //.populate('address'); .billingdetails
 
-                console.log(lastOrder)
+                // console.log(lastOrder)
             if (lastOrder) {
                 // Check if both order and payment statuses are 'Pending'
                 console.log(lastOrder.orderStatus ,  lastOrder.paymentStatus)
@@ -397,7 +397,7 @@ const userOrderProducts = async (req, res) => {
 
         const products = order.items.map(item => item.product);
 
-        console.log(products)
+        // console.log(products)
         
         res.render('user/order-products', {
             order: order,
@@ -560,8 +560,8 @@ const getSalesReport = async (req, res) => {
             sort['orderDate'] = sortOrder === "Ascending" ? 1 : -1;
         }
 
-        console.log(conditions)
-        console.log(sort)
+        // console.log(conditions)
+        // console.log(sort)
 
         const orders = await orderModel.find(conditions).sort(sort);
 
@@ -578,8 +578,8 @@ const getSalesReport = async (req, res) => {
             overallDiscountAmount += order.discountAmount || 0;
         }
 
-        console.log(overallOrderAmount)
-        console.log(overallDiscountAmount)
+        // console.log(overallOrderAmount)
+        // console.log(overallDiscountAmount)
 
         let page = Number(req.query.page);
         if (isNaN(page) || page < 1) {

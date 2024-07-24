@@ -106,12 +106,12 @@ const getTopSoldProducts  = async () => {
             $limit: 5 
           }
         ]);
-        console.log("topSoldProducts" ,topSoldProducts)
+        // console.log("topSoldProducts" ,topSoldProducts)
 
         // Populate product details
         const populatedProducts  =  topSoldProducts.sort({ createdOn: -1 })
         .limit(4);
-        console.log(populatedProducts)
+        // console.log(populatedProducts)
         // const populatedProducts = await productModel.populate(topSoldProducts, { path: '_id', select: 'name description price image' });
 
     return populatedProducts;

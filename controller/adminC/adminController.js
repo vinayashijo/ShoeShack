@@ -226,7 +226,7 @@ const getAdminOrderList = async (req, res) => {
 
       if(!sortData)
       {  
-        console.log("sortorder nothing,so orderdate")
+        // console.log("sortorder nothing,so orderdate")
         sortData = "orderDate"
       }
       const sort = {};
@@ -437,7 +437,7 @@ const formatDateString  = (orderDate) => {
 
 //sales report
 const getSalesReport = async (req, res) => {
-  console.log("i m in sales report")
+  // console.log("i m in sales report")
   try {
       const { from, to, period, sortData, sortOrder } = req.query;
       const currentDate = new Date();

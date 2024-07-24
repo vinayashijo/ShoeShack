@@ -37,7 +37,7 @@ const loadproductlist= async function(req,res){
          const products  = await productModel.find( condition).populate('category')
          .sort(sort).skip( (page-1) * ITEMS_PER_PAGE).limit(ITEMS_PER_PAGE)
     
-         console.log(products)
+        //  console.log(products)
         //  console.log("productTotalCount,condition,sort",productTotalCount,condition,sort)
 
     const Message=req.flash('message')
@@ -99,7 +99,7 @@ const addproducts = async (req, res) => {
       }
     
       if (!productExist) {
-          console.log("product does not exist");
+          // console.log("product does not exist");
           
          const images = [];
 
@@ -111,7 +111,7 @@ const addproducts = async (req, res) => {
           
                   // Check if the file is an image (only allow image/jpeg, image/png, and image/gif)
                   if (!(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/gif')) {
-                      console.log("Invalid File MIME Type:", file.mimetype);
+                      // console.log("Invalid File MIME Type:", file.mimetype);
                       const errormessage = "Cannot Add product. Please upload images in JPEG, PNG, or GIF format only.";
                       return res.json({ success: false, fileerrormessage: errormessage });
                   }
@@ -205,9 +205,9 @@ const loadeditProductPage = async(req,res)=>{
 
 const productupdate = async (req, res) => {
     try {
-        console.log("req now in productUpdate ");
+        // console.log("req now in productUpdate ");
         const id = req.params.id;
-        console.log(id)
+        // console.log(id)
         const data = req.body;
         const images = [];
   

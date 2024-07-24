@@ -8,14 +8,10 @@ const moment = require("moment")
 module.exports={
     getCoupons: async (req, res,next) => {
         try {
-                        console.log("i m in coupons")
-
+        
             const { search, sortData, sortOrder } = req.query;
             const condition = {};          
-            console.log("i m in coupons")
-
-            console.log( search, sortData, sortOrder )
-
+           
             let page = Number(req.query.page);
             if (isNaN(page) || page < 1) {
                 page = 1;
@@ -40,10 +36,10 @@ module.exports={
             const couponsCount = await couponModel.countDocuments(condition);
             const limit =  paginationHelper.SALES_PER_PAGE;
 
-            console.log(couponsCount)
-            console.log(limit)
-            console.log(sort)
-            console.log(condition)
+            // console.log(couponsCount)
+            // console.log(limit)
+            // console.log(sort)
+            // console.log(condition)
 
             const filteredCoupons = await couponModel.find(condition)
                 .sort(sort)
@@ -220,7 +216,7 @@ module.exports={
             const {user}=req.session
             const coupon= await couponModel.find({name:couponCode,status:true})
 
-            console.log("applyCoupn ",coupon)
+            // console.log("applyCoupn ",coupon)
             
             if(coupon && coupon.length>0){
                 const now=new Date()
@@ -241,7 +237,7 @@ module.exports={
                         let discountAmount = discount
                         const minAmount = coupon[0].minimumAmount
                         if(total<minAmount){
-                            console.log("Minimum amount not reached",total,coupon[0].minimumAmount)
+                            // console.log("Minimum amount not reached",total,coupon[0].minimumAmount)
 
                             return res.json({success:false,message:"Minimum amount not reached"})
                         }

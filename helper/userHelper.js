@@ -17,8 +17,8 @@ const doSignUp = (userData, verify, emailVerify) => {
 
               const ownReferralCode = await module.exports.generateReferralCode();
 
-              console.log(ownReferralCode)
-              console.log(password)
+              // console.log(ownReferralCode)
+              // console.log(password)
 
               let isreferred = false;
               let walletBalance = 0;
@@ -27,7 +27,7 @@ const doSignUp = (userData, verify, emailVerify) => {
               if (userData.referal) {
                 const referredCode = userData.referal;
                 const referrer = await userModel.findOne({ referralCode: referredCode }); // Await the referrer query
-                console.log(referrer)
+                // console.log(referrer)
                 if (referrer) {
                   isreferred = true;
                   referredBy = referrer._id;
@@ -57,11 +57,11 @@ const doSignUp = (userData, verify, emailVerify) => {
                 wallet: walletBalance,
                 isVerified: true,
               };
-              console.log(userd)
+              // console.log(userd)
 
               if (userData.referal)
                  {
-                console.log(userData.referal)
+                // console.log(userData.referal)
                 userd.referredBy = referredBy;
                 userd.isreferred = true;
 
@@ -75,7 +75,7 @@ const doSignUp = (userData, verify, emailVerify) => {
                 //await referrer.save();
 
               }
-              console.log(userData)
+              // console.log(userData)
 
               await userModel
                 .create(userd)
@@ -185,7 +185,7 @@ const postuserSignup = async (req, res) => {
           }
       }  
       const referralCode = await module.exports.generateReferralCode();
-      console.log("refferalcode",referralCode)
+      // console.log("refferalcode",referralCode)
 
       const otp = verificationController.sendMail(req.body.email);
       const password = await bcrypt.hash(req.body.password, 12);//password hashing

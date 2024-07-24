@@ -137,7 +137,7 @@ const getSalesReport = async (req, res) => {
     } else if (exportType === "pdf") {
       return generatePdfReport(orders, res);
     }
-    console.log("overallSalesCount", orders.length);
+    // console.log("overallSalesCount", orders.length);
 
     const overallSalesCount = orders.length;
     let overallOrderAmount = 0;
@@ -147,7 +147,7 @@ const getSalesReport = async (req, res) => {
     for (const order of orders) {
       overallOrderAmount += order.totalPrice;
       overallDiscountAmount += order.discountAmount || 0;
-      console.log("order.items", order.items);
+      // console.log("order.items", order.items);
 
       for (const item of order.items) {
         console.log("i m in orders items");
@@ -158,8 +158,8 @@ const getSalesReport = async (req, res) => {
           productObj[item.productId] = 1;
         }
 
-        console.log("order.items", productObj);
-        console.log("order.items", productObj[item.productId]);
+        // console.log("order.items", productObj);
+        // console.log("order.items", productObj[item.productId]);
       }
     }
 
@@ -170,7 +170,7 @@ const getSalesReport = async (req, res) => {
 
     const orderCount = await orderModel.countDocuments(conditions);
 
-    console.log("orderCount",orderCount)
+    // console.log("orderCount",orderCount)
 
     const limit =
       req.query.seeAll === "seeAll"
@@ -183,7 +183,7 @@ const getSalesReport = async (req, res) => {
       .skip((page - 1) * paginationHelper.SALES_PER_PAGE)
       .limit(limit);
 
-    console.log("order.items", productObj);
+    // console.log("order.items", productObj);
 
     if (period) {
       res.render("admin/sale-report", {
