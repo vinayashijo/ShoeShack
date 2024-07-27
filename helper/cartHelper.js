@@ -37,22 +37,22 @@ const getcart = async (userId) => {
     }
 };
 
-    const calculateTotalPricefromItems = (items) => {
-        return items.reduce((total, item) => total + (item.price * item.quantity), 0);
-    };
+const calculateTotalPricefromItems = (items) => {
+return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+};
 
-    const calculateTotalPrice = async (userId) => {
-        try {
+const calculateTotalPrice = async (userId) => {
+try {
     const cartItems = await cartModel.findOne({ userId }).populate("items.productId");
     if (cartItems) {
-        const totalPrice = calculateTotalPricefromItems(cartItems.items);
-        return parseFloat(totalPrice);
-    }
-        return 0;
-        } catch (error) {
-        // console.error("Error calculating total price:", error);
-        throw error;
-    }
+    const totalPrice = calculateTotalPricefromItems(cartItems.items);
+    return parseFloat(totalPrice);
+ }
+    return 0;
+    } catch (error) {
+    // console.error("Error calculating total price:", error);
+    throw error;
+}
 };
 
 const updateQuantities = async (userId, productId, action) => {
