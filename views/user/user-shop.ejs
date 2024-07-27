@@ -170,6 +170,7 @@ function sortProductsByName(sortOrder) {
     const currentUrl = window.location.href;
     const url = new URL(currentUrl);
     const params = new URLSearchParams(url.search);
+    alert(params)
     if (sortOrder === 'aA_to_zZ') {
         params.set('sort', 'name_aA_to_zZ');
     } else if (sortOrder === 'Aa_to_Zz') {
@@ -285,7 +286,7 @@ function toggleReadMore(event) {
                             </select>
                         </div>
                         <div class="shop__product__option__right">
-                            <input type="checkbox" id="hideOutOfStockCheckbox" onchange="toggleOutOfStock()">
+                            <input type="checkbox" id="hideOutOfStockCheckbox" class="width:50px;height:50px" onchange="toggleOutOfStock()">
                             <label for="hideOutOfStockCheckbox">Hide Out of Stock</label>
                         </div>
                     </div>

@@ -36,6 +36,16 @@
                                     <textarea  name="description" id="description" placeholder="Type here" class="form-control"></textarea>
                                     <div id="description-error" class="error-message"></div>
                                 </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Offer</label>
+                                    <div class="input-group">
+                                        <input type="text" placeholder="Type here" name="offer" class="form-control" id="offer" />
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" style="background-color: #fff; border: none; border-left: 1px solid #ced4da;">%</span>
+                                        </div>
+                                    </div>
+                                    <div id="offer-error" class="error-message"></div>
+                                </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Create category</button>
                                 </div>
@@ -50,6 +60,7 @@
                                             </th>
                                             <th>Name</th>
                                             <th>Description</th>
+                                            <th>Offer</th>
                                             <th>Edit</th>
                                             <th>status</th>
                                             <th >List/Unlist</th>
@@ -61,7 +72,7 @@
                                                     <td><!-- Content for the first column, if needed --></td>
                                                     <td><%= row.name %></td>
                                                     <td><b><%= row.description %></b></td>
-                                                    
+                                                    <td><b><%= row.offer %></b></td>
                                                     <td>
                                                         <a href="/editcategory?id=<%= row._id %>">
 
@@ -102,6 +113,55 @@
                 </div> 
             </div> 
         </section> 
+
+    <!-- Pagination Section Begin -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= prevPage %>" data-page="<%= prevPage %>">
+                            <i class="material-icons md-chevron_left"></i>
+                        </a>
+                    </li>
+                <% } %>
+                <% if (currentPage > 2) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=1" data-page="1">1</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <% } %>
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage - 1 %>" data-page="<%= currentPage - 1 %>"><%= currentPage - 1 %></a>
+                    </li>
+                <% } %>
+                <li class="page-item active">
+                    <span class="page-link"><%= currentPage %></span>
+                </li>
+                <% if (hasNextPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= currentPage + 1 %>" data-page="<%= currentPage + 1 %>"><%= currentPage + 1 %></a>
+                    </li>
+                <% } %>
+                <% if (nextPage !== lastPage && currentPage !== lastPage) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= lastPage %>" data-page="<%= lastPage %>"><%= lastPage %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage !== lastPage) { %>
+                    <li class="page-item">
+                        <a class="page-link pagination-link" href="?page=<%= nextPage %>" data-page="<%= nextPage %>">
+                            <i class="material-icons md-chevron_right"></i>
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+    <!-- Pagination Section End -->
+
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">
                 <div class="col-sm-6">
@@ -185,6 +245,8 @@
     function validateForm() {
     const categoryName = document.getElementById('product_name').value.trim();
     const description = document.getElementById('description').value.trim();
+    const offer = document.getElementById('offer').value.trim();
+
     const alphabetRegex =  /^[a-zA-Z.\s]+$/;
 
     if (!categoryName) {
@@ -204,6 +266,24 @@
         return false;
     } else {
         document.getElementById('description-error').innerText = '';
+    }
+
+    if (isNaN(offer)) {
+        document.getElementById('offer-error').innerText = 'Offer is not a number';
+        return false;
+    } 
+    else if (offer < 0)
+    {
+        document.getElementById('offer-error').innerText = 'Offer is not a positive number';
+        return false;
+    }
+    else if (offer >=100)
+    {
+        document.getElementById('offer-error').innerText = 'Offer percentage should be less than 100%';
+        return false;
+    }
+    else {
+        document.getElementById('offer-error').innerText = '';
     }
 
     return true;

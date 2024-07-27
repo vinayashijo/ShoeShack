@@ -321,7 +321,6 @@ const changeOrderStatus = async (req, res) => {
     }
 
     const currentStatus = order.items[0].status;
-    // console.log(currentStatus)
 
     if (newStatus === 'Cancelled') {
       for (let item of order.items) {
@@ -502,7 +501,6 @@ const getSalesReport = async (req, res) => {
           };
       }
 
-     
       const sort = {};
       if (sortData) {
           sort[sortData] = sortOrder === "Ascending" ? 1 : -1;
@@ -510,15 +508,8 @@ const getSalesReport = async (req, res) => {
           sort['orderDate'] = sortOrder === "Ascending" ? 1 : -1;
       }
 
-      // console.log(conditions)
-      // console.log(sort)
-
       const orders = await orderModel.find(conditions).sort(sort);
-
-      // console.log("Delivered Orders" ,orders)
-
       const overallSalesCount = orders.length;
-      // console.log(overallSalesCount)
 
       let overallOrderAmount = 0;
       let overallDiscountAmount = 0;
@@ -548,9 +539,7 @@ const getSalesReport = async (req, res) => {
           }
 
         }
-        // console.log('productObj:', productObj);
-        // console.log('overallProductCount:', Object.keys(productObj).length);
-
+     
       overallProductCount = Object.keys(productObj).length
       let page = Number(req.query.page);
       if (isNaN(page) || page < 1) {
@@ -564,8 +553,11 @@ const getSalesReport = async (req, res) => {
           .sort(sort)
           .skip((page - 1) * paginationHelper.SALES_PER_PAGE)
           .limit(limit);
-
-      res.render('admin/sales-report', {
+      
+         const ITEMS_PER_PAGE = paginationHelper.SALES_PER_PAGE
+         const filterOrdersTotalCount =  filteredOrders.length
+   
+        res.render('admin/sales-report', {
           admin: true,
           moment,
           shortDateFormat: 'DD-MM-YYYY', 
@@ -573,12 +565,12 @@ const getSalesReport = async (req, res) => {
           from: from,
           to: to,
           period: period,
-          currentPage: page,
-          hasNextPage: page * paginationHelper.SALES_PER_PAGE < orderCount,
-          hasPrevPage: page > 1,
-          nextPage: page + 1,
-          prevPage: page - 1,
-          lastPage: Math.ceil(orderCount / paginationHelper.SALES_PER_PAGE),
+          currentPage : page,
+          hasNextPage : filterOrdersTotalCount  >  page * ITEMS_PER_PAGE,
+          hasPrevPage : page > 1,
+          nextPage : page + 1,
+          prevPage :page --,
+          lastPage : Math.ceil(filterOrdersTotalCount/ ITEMS_PER_PAGE),
           sortData: sortData,
           sortOrder: sortOrder,
           overallSalesCount: overallSalesCount || 0,

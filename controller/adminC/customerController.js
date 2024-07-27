@@ -2,9 +2,9 @@ const userModel=require("../../model/userModel")
 const paginationHelper=require('../../helper/paginationHelper')
 
 //customer or user page mangement--------------------------------------------
-const loadcustomermanagement = async (req, res) => {
+const loadcustomers = async (req, res) => {
   try {
-    // console.log("load customermanagement")
+     console.log("load customers")
 
     let { sortData,sortOrder } = req.query;
     const { search = '' } = req.query;
@@ -47,7 +47,7 @@ const loadcustomermanagement = async (req, res) => {
     .limit(limit); 
 
     const usersCount = await userModel.countDocuments(searchCriteria);  
-    res.render("admin/customer-management",{
+    res.render("admin/customers",{
           data:filteredData,
           currentPage : page,
           hasNextPage : usersCount  >  page * paginationHelper.ORDER_PER_PAGE,
@@ -69,7 +69,8 @@ const loadcustomermanagement = async (req, res) => {
 //list & unlist user-----------------------------------------------------------
 const  blockOrUnblockcustomer= async (req, res) => {
   try {
-      const id = req.query.id;
+    console.log("i m in unblock")
+      const id = req.params.id;
       const user = await userModel.findOne({ _id: id });
 
       if (!id || !user) {
@@ -90,6 +91,6 @@ const  blockOrUnblockcustomer= async (req, res) => {
 };
 
 module.exports={
-  loadcustomermanagement,
+  loadcustomers,
   blockOrUnblockcustomer,
 }

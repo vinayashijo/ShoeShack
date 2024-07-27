@@ -49,6 +49,7 @@ const loadproductlist= async function(req,res){
         hasNextPage : productTotalCount  >  page * ITEMS_PER_PAGE,
         hasPrevPage : page > 1,
         nextPage : page + 1,
+        prevPage :page --,
         lastPage : Math.ceil(productTotalCount/ ITEMS_PER_PAGE),
         search :search,
         sortData : sortData,

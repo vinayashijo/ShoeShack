@@ -32,6 +32,16 @@
                                     <textarea name="description" id="descriptionX" class="form-control"><%= data[0].description %></textarea>
                                     <div id="description-error" class="text-danger"></div>
                                 </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Offer</label>
+                                    <div class="input-group">
+                                        <input placeholder="$" value="<%=data[0].offer %>" id="offerX" name="offer" type="text" class="form-control border">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" style="background-color: #fff; border: none; border-left: 1px solid #ced4da;">%</span>
+                                        </div>
+                                    </div>
+                                    <div id="offer-error" class="error-message"></div>
+                                </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Update Category</button>
                                 </div>
@@ -48,9 +58,7 @@
     <script src="/public/admin-assets/js/vendors/jquery.fullscreen.min.js"></script>
 
     <script>
-
-
-setTimeout(() => {
+    setTimeout(() => {
             const insertmessage = document.getElementById("insertmessage");
             insertmessage.style.display = "none";
         }, 5000)
@@ -59,16 +67,18 @@ setTimeout(() => {
     function validateForm() {
     const categoryName = document.getElementById('categoryX').value.trim();
     const description = document.getElementById('descriptionX').value.trim();
+    const offer = document.getElementById('offerX').value.trim();
+
     const alphabetRegex =  /^[a-zA-Z.\s]+$/;
 
     if (!categoryName) {
         document.getElementById('categoryName-error').innerText = 'Name is required';
         return false;
-    } else if (!alphabetRegex.test(categoryName)) {
+    } 
+    else if (!alphabetRegex.test(categoryName)) {
         document.getElementById('categoryName-error').innerText = "Category Name should contain only alphabets";
         return false;
     } 
-    
     else {
         document.getElementById('categoryName-error').innerText = '';
     }
@@ -76,27 +86,28 @@ setTimeout(() => {
     if (!description) {
         document.getElementById('description-error').innerText = 'Description is required';
         return false;
-    } else {
+    } 
+    else {
         document.getElementById('description-error').innerText = '';
     }
 
+    if (isNaN(offer)) {
+        document.getElementById('offer-error').innerText = 'Offer should be a number';
+        return false;
+    } 
+    else if (offer < 0)
+    {
+        document.getElementById('offer-error').innerText = 'Offer is not a positive number';
+        return false;
+    }
+    else if (offer >=100)
+    {
+        document.getElementById('offer-error').innerText = 'Offer percentage should be less than 100%';
+        return false;
+    }
+    else {
+        document.getElementById('offer-error').innerText = '';
+    }
     return true;
 }
-        
-        
-        // function displayErrorMessage(elementId, message) {
-        //     var errorElement = document.getElementById(elementId);
-        //     errorElement.innerText = message;
-        //     errorElement.style.display = "block";
-        //     errorElement.style.color = "red";
-        // }
-    
-        // function resetErrorMessages() {
-        //     var errorElements = document.querySelectorAll(".error-message");
-        //     errorElements.forEach(function (element) {
-        //         element.innerText = "";
-        //         element.style.display = "none";
-        //     });
-        // }
-            
     </script>

@@ -32,8 +32,8 @@ router.post('/addproducts',upload.array("images",5),productController.addproduct
 router.patch('/productunlist',isAdmin,productController. blockOrUnblockproduct)
 router.get('/editproductpage',isAdmin,productController.loadeditProductPage)
 router.post('/updateproduct/:id',upload.array("images",5),productController.productupdate)
-router.get('/customermanagement',isAdmin, customerController.loadcustomermanagement);
-router.patch('/customerunlist',isAdmin,customerController.blockOrUnblockcustomer)
+router.get('/customers',isAdmin, customerController.loadcustomers);
+router.post('/customerunlist/:id',isAdmin,customerController.blockOrUnblockcustomer)
 router.post('/delete-image',isAdmin,productController.deleteImage)
 
 //orders

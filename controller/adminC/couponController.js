@@ -70,6 +70,7 @@ module.exports={
         const sdate = new Date().toISOString().split('T')[0]; // Example starting date as today
         const edate = ''; // Example expiry date
       
+        
         res.render('admin/add-coupon', { sdate: sdate,
             edate: edate,
             coupon: {}, // Ensure to pass a default coupon object
@@ -82,18 +83,20 @@ module.exports={
           const { name, description, startingDate, expiryDate, minimumAmount,maxDiscount, discountType, discount } = req.body;
           const exist = await couponModel.findOne({ name: name.toUpperCase() });
       
-          if (exist) {
-            return res.redirect('/addcoupon?error=coupon-exists');
-          }
-        //   console.log(discountType)
-        //   console.log(minimumAmount)
-        //   console.log(discount)
-
-          if(discountType=="fixed-amount" && discount>=maxDiscount )
+            if(discountType ==="percentage" && discount >=100)
             {
                 return res.redirect('/addcoupon?error=more-discount');
             }
-
+           
+            if (exist) {
+                return res.redirect('/addcoupon?error=coupon-exists');
+            }
+   
+            if(discountType=="fixed-amount" && discount>=maxDiscount )
+            {
+                return res.redirect('/addcoupon?error=more-discount');
+            }
+          
           const coupon = new couponModel({
             name: name.toUpperCase(),
             description: description,
@@ -119,11 +122,14 @@ module.exports={
             const { id } = req.query;
             const coupon = await couponModel.findOne({ _id: id });
 
+            // startingDate
             // console.log(coupon)
+
             res.render('admin/edit-coupon', {
                 admin: true,
                 coupon: coupon
             });
+
         } catch (error) {
             res.redirect('/500');
         }
@@ -136,23 +142,19 @@ module.exports={
             const { name, description, startingDate, expiryDate, minimumAmount, maxDiscount,discountType, discount } = req.body;
             const updatedName = name.toUpperCase();
 
-            // console.log(name,description,startingDate, expiryDate, minimumAmount ,maxDiscount,discountType, discount, id)
             // Check if the provided coupon name already exists
             const existingCoupon = await couponModel.findOne({ name: updatedName });
-            // console.log(existingCoupon)
+          
             // If the same coupon name exists and it's not the current coupon being edited
             if (existingCoupon && existingCoupon._id.toString() !== id) {
-                req.flash('err', 'Coupon name must be unique');
-                return res.redirect('/coupons');
+                console.log("coupon-exists")
+                return res.redirect('/editcoupon?error=coupon-exists');
             }
             if( (discountType=="percentage" && discount>=100 ) || (discountType=="fixed-amount" && discount>=minimumAmount ) )
             {
-                 // Your route logic here
-                //throw new Error("More discounts given!");
-                 req.flash('err', 'More discounts given');
-                return res.redirect('/coupons');
-                // return res.redirect('/addcoupon?error=more-discount');
+                return res.redirect('/editcoupon?error=more-discount');
             }
+
             
             await couponModel.updateOne({ _id: id }, {
                 $set: {

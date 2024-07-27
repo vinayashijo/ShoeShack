@@ -98,7 +98,9 @@
         if (urlParams.has('error') && urlParams.get('error') === 'coupon-exists') {
             alert('Coupon name already exists');
         }
-     
+        if (urlParams.has('error') && urlParams.get('error') === 'more-discount') {
+            alert('Coupon discount is in higher limit!');
+        }
         function validateMaxDiscount() {
             const maxAmountInput = document.getElementById('max-discount');
             const discountInput = document.getElementById('discount');

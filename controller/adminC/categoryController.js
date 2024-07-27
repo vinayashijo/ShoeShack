@@ -1,16 +1,34 @@
 
 const categoryModel=require('../../model/categoryModel')
-
-
-
+const pageHelper=require('../../helper/paginationHelper')
 
 //category list page----------------------------------------------------------------
 const loadcategorylist = async function(req, res) {
   try {
+
       const data = await categoryModel.find()
       const {error}=req.flash() 
       const {message}=req.flash()
-      res.render('admin/category-list', { data: data, error:error, message:message});
+      let {page} = req.query
+       if(!page)
+       {
+        page= 1
+       }
+      
+      const ITEMS_PER_PAGE = pageHelper.CATEGORY_PER_PAGE
+      const categoryTotalCount = await  categoryModel.find().count()
+
+      console.log("categorycount,itemsperpage",categoryTotalCount)
+
+      res.render('admin/category-list', { data: data, error:error, message:message,
+        currentPage : page,
+        hasNextPage : categoryTotalCount  >  page * ITEMS_PER_PAGE,
+        hasPrevPage : page > 1,
+        nextPage : page + 1,
+        prevPage :page --,
+        lastPage : Math.ceil(categoryTotalCount/ ITEMS_PER_PAGE),
+      });
+
   } catch (error) {
       console.error("Error fetching category data:", error);
       res.status(500).send("Internal Server Error");
@@ -24,16 +42,19 @@ const loadaddToCategory = async(req,res)=>{
   try {
       const name = req.body.categoryName;
       const description = req.body.description
+      const offer  = req.body.offer
        const categoryExist = await categoryModel.findOne({name:name})
        
        if (!categoryExist) {
             const categoryadded = {
               name:name,
               description:description,
+              offer: offer,
               islisted:true
             }   
             
            await categoryModel.create(categoryadded)
+           console.log("Category added successfully")
 
             res.redirect("/categorylist");
           
@@ -53,7 +74,7 @@ const loadunlistorlist = async (req, res) => {
   try {
       // console.log("req for list or unlist");
       const id = req.query.id;
-      console.log("/////" + id);
+      // console.log("/////" + id);
       const category = await categoryModel.findById(id);
       // console.log(category);
 
@@ -95,18 +116,21 @@ const loadeditcategorypage=async function(req, res) {
 const updateCategory = async (req, res) => {
   try {
     const id = req.params.id;
-    // console.log(id);
-    const category = req.body;
-    // console.log(id)
+    const { categoryName,description, offer } = req.body;
+
+    console.log("i m in category update")
+    console.log(categoryName,description, offer,req.body )
     
-    const existingCategory = await categoryModel.findOne({ name: category.categoryName });
+    const existingCategory = await categoryModel.findOne({ name: categoryName });
 
     if (!existingCategory||existingCategory._id.toString() === id) {
-      await categoryModel.findByIdAndUpdate(id, {
-        name: category.categoryName,
-        description: category.description,
-      });
 
+      await categoryModel.findByIdAndUpdate(id, {
+        name: categoryName,
+        description: description,
+        offer: offer
+      });
+      console.log("Category updated successfully")
       req.flash("message", "Category updated successfully");
       res.redirect("/categorylist");
     } else {
@@ -118,7 +142,6 @@ const updateCategory = async (req, res) => {
     res.redirect("/categorylist");
   }
 };
-
 
 
 module.exports={

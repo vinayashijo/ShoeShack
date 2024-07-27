@@ -1,15 +1,37 @@
 <%- include ('../partials/adminheader') %>
-
-
 <script>
+      // Check if the error flag is present in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error') && urlParams.get('error') === 'coupon-exists') {
+            alert('Coupon name already exists');
+        }
+        if (urlParams.has('error') && urlParams.get('error') === 'more-discount') {
+            alert('Coupon discount is in higher limit!');
+        }
 
-    // Check if the error flag is present in the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('error') && urlParams.get('error') === 'coupon-exists') {
-        alert('Coupon name already exists');
-    }
+        function validateMaxDiscount() {
+            const maxAmountInput = document.getElementById('max-discount');
+            const discountInput = document.getElementById('discount');
+            const validationMessage = document.getElementById('maxDiscount-error');
 
-    function validateStartingDate() {
+            const discount = discountInput.value
+            const maxAmount = maxAmountInput.value
+            if(discount<0 )
+            {
+               validationMessage.textContent = 'Discount must be positive.';
+                maxAmountInput.setCustomValidity('Invalid');
+            }
+
+            if (discount < maxAmount) {
+              validationMessage.textContent = 'Discount must be today or in the future.';
+              maxAmountInput.setCustomValidity('Invalid');
+            } else {
+            validationMessage.textContent = '';
+            maxAmountInput.setCustomValidity('');
+            }
+        }
+
+        function validateStartingDate() {
         const startingDateInput = document.getElementById('Starting-date');
         const validationMessage = document.getElementById('date-validation-message');
         // alert(startingDateInput)
@@ -26,7 +48,7 @@
         }
     }
 
-    function validateExpiryDate() {
+        function validateExpiryDate() {
         const expiryDateInput = document.getElementById('expiry-date');
         const validationMessage = document.getElementById('expiry-validation-message');
 
@@ -43,6 +65,7 @@
         expiryDateInput.setCustomValidity('');
         }
     }
+
 </script>
 
 
@@ -111,7 +134,7 @@
                       <div class="row" >
                           <div class="col-lg-4 mb-4">
                             <label for="discount-type">Discount</label>
-                            <input type="number" class="form-control border" id="discount" name="discount" value="<%=coupon.discount %>" placeholder="Discount" required>
+                            <input type="number" class="form-control border" id="discount" name="discount" value="<%=coupon.discount %>" placeholder="Discount" required oninput="validateMaxDiscount" >
                             <div id="discount-error" class="error-message"></div>
                           </div>
                         <div class="col-lg-4 mb-4">
