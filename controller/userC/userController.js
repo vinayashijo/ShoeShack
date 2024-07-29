@@ -209,8 +209,6 @@ const loadshop = async function (req, res) {
       const user = await userModel.findById(userId);
 
       if (!user.isActive) {
-        // console.log("!user.isActive", user.isActive);
-
         req.session.user = null;
         res.redirect("/usershop"); // User is not blocked, proceed to the next,else login page / u can show LOgin instead of LOgout
       }
@@ -231,8 +229,6 @@ const loadshop = async function (req, res) {
     }
 
     if (search) {
-      // console.log(search);
-
       condition.$or = [
         { name: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
@@ -244,6 +240,8 @@ const loadshop = async function (req, res) {
     }
 
     let sortCondition = {};
+    console.log("sort",sort)
+
     switch (sort) {
       case "price_aA_to_zZ":
         sortCondition = { regularPrice: 1 };
@@ -254,7 +252,7 @@ const loadshop = async function (req, res) {
       case "name_aA_to_zZ":
         sortCondition = { productName: 1 };
         break;
-      case "name_Aa_to_Zz":
+      case "price_Aa_to_Zz":
         sortCondition = { productName: -1 };
         break;
       case "popularity":
@@ -278,11 +276,6 @@ const loadshop = async function (req, res) {
       .sort({ createdOn: -1 })
       .limit(4);
 
-    //const popularData = data.limit(2)
-
-        // console.log(popularData)
-
-    
     const newfilteredProducts = newproducts.filter(
       (product) => product.category
     );
@@ -301,9 +294,8 @@ const loadshop = async function (req, res) {
     //notification cart count
     req.session.productCount = cartCount;
 
-    // console.log("req.session.productCount", req.session.productCount);
 
-    res.render("user/index-4", {
+    res.render("user/user-shop", {
       data,
      
       newproducts: newfilteredProducts,

@@ -1,370 +1,429 @@
-<%- include ('../partials/userheader') %>
-<style>
-/* General Styles */
-.product-img {
-  width: 100%;
-  height: 150px; /* Fixed height for images */
-  overflow: hidden;
-}
+﻿<%- include ('../partials/userheader') %>
 
-.product-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Ensure image covers the container without stretching */
-}
+   <style>
+    .product-grid-4 {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px; /* Adjust gap between items as needed */
+    }
 
-/* Truncate Product Name */
-.product-name {
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  vertical-align: middle;
-}
-
-.product-name.expanded {
-  white-space: normal;
-}
-
-.read-more-link {
-  color: blue;
-  cursor: pointer;
-  text-decoration: underline;
-  display: none;
-  vertical-align: middle;
-}
-
-.product-name.collapsed + .read-more-link {
-  display: inline;
-}
-
-/* Sidebar Styles */
-
-
-.shop__sidebar
-{
-    width : 200px !important;
-    border: none;
-}
-.shop__sidebar__categories ul {
-  list-style: none;
-  padding: 0;
-}
-
-.shop__sidebar__categories ul li a {
-  color: #333;
-  
-  padding: 5px 10px;
-  border-bottom: 0px solid #eee;
-  text-decoration: none;
-}
-
-.shop__sidebar__categories ul li a:hover, 
-.shop__sidebar__categories ul li a:focus, 
-.shop__sidebar__categories ul li a.active {
-  background-color: #f8f8f8;
-  color: #000;
-}
-
-/* Sorting and Filter Styles */
-.shop__product__option {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.shop__product__option__right {
-  display: flex;
-  align-items: center;
-  margin-right: 20px;
-}
-
-.shop__product__option__right label {
-  margin-right: 10px;
-}
-
-.shop__product__option__right select {
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 20px;
-  width:200px;
-  height: 30px;
-}
-
-.shop__product__option__right input[type="checkbox"] {
-  margin-right: 5px;
-  border:none;
-  height:10px;
-  width:15px
-}
-
-.shop__product__option__right label {
-  margin-bottom: 0;
-}
-
-/* Pagination Styles */
-.pagination-area {
-  margin-top: 20px;
-}
-
-.pagination-area .pagination {
-  display: flex;
-  justify-content: center;
-}
-
-.pagination-area .pagination li a {
-  color: #333;
-  padding: 10px 15px;
-  text-decoration: none;
-  border: 1px solid #ddd;
-  margin: 0 2px;
-  border-radius: 5px;
-}
-
-.pagination-area .pagination li a:hover,
-.pagination-area .pagination li a:focus,
-.pagination-area .pagination li.active a {
-  background-color: #f8f8f8;
-  color: #000;
-}
-</style>
-
-<!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", async function () {
-    var urlParams = new URLSearchParams(window.location.search);
-    var catValue = urlParams.get('cat');
-    var categoryLinks = document.querySelectorAll(".shop__sidebar__categories ul li a");
-    categoryLinks.forEach(function (link) {
-        var href = link.getAttribute("href");
-        if (!catValue || (catValue && href.includes('cat=' + catValue))) {
-            link.style.color = "black";
-        }
+   </style>
+       <!-- Include Axios CDN -->
+   <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        
+        var urlParams = new URLSearchParams(window.location.search);
+        var catValue = urlParams.get('cat');
+        var categoryLinks = document.querySelectorAll(".shop__sidebar__categories ul li a");
+        categoryLinks.forEach(function (link) {
+            var href = link.getAttribute("href");
+            if (!catValue || (catValue && href.includes('cat=' + catValue))) {
+                link.style.color = "black";
+            }
+       });
     });
-});
 
-function toggleOutOfStock() {
-    var hideOutOfStock = document.getElementById("hideOutOfStockCheckbox").checked;
-    // alert(hideOutOfStock)
-    // Redirect to the shop page with the updated hideOutOfStock query parameter
-    window.location.href = "/usershop?hideOutOfStock=" + hideOutOfStock;
-}
-
-function sortProductsByPrice(sortOrder) {
-    const currentUrl = window.location.href;
-    const url = new URL(currentUrl);
-    const params = new URLSearchParams(url.search);
-    if (sortOrder === 'low_to_high') {
-        params.set('sort', 'price_low_to_high');
-    } else if (sortOrder === 'high_to_low') {
-        params.set('sort', 'price_high_to_low');
+    function categoryandsearch(categoryid) {
+       var searchInput = document.getElementById('searchInput').value;
+       var categoryValue =categoryid;
+        window.location.href = `/usershop?cat=${categoryid}&search=${searchInput}`
     }
-    window.location.href = '/usershop?' + params.toString();
-}
-
-function sortProductsByName(sortOrder) {
-    const currentUrl = window.location.href;
-    const url = new URL(currentUrl);
-    const params = new URLSearchParams(url.search);
-    alert(params)
-    if (sortOrder === 'aA_to_zZ') {
-        params.set('sort', 'name_aA_to_zZ');
-    } else if (sortOrder === 'Aa_to_Zz') {
-        params.set('sort', 'name_Aa_to_Zz');
-    }
-    window.location.href = '/usershop?' + params.toString();
-}
-
-async function addToCart(productId) {
-    try {
-        const response = await axios.post('/addtocart', { productId });
-        if (!response.data.login) {
-            return window.location.href = '/userlogin';
+    
+    // Function to sort products by price
+    function sortProductsByPrice(sortOrder) {
+        const params = new URLSearchParams(window.location.search);
+        console.log(params)
+        if (sortOrder === 'price_aA_to_zZ') {
+            params.set('sort', 'price_aA_to_zZ');
+        } else if (sortOrder === 'price_Aa_to_Zz') {
+            params.set('sort', 'price_Aa_to_Zz');
         }
-        if (response.data.outOfStock) {
-            alert("Product is out of stock!");
-            return;
-        }
-        if (response.data.newItem === true) {
-            const count = document.getElementById('cartCount');
-            
-            currentCount = parseInt(count.innerHTML);
-            updatedCount = currentCount + 1;
-            count.innerHTML = updatedCount;
-            window.location.reload();
-            Swal.fire({
-                title: 'Product Added to Cart',
-                text: 'The selected product has been added to your cart.',
-                icon: 'success',
-                confirmButtonColor: '#28a745',
-                confirmButtonText: 'OK'
-            });
-        } else {
-            console.error('Unexpected response status:', response.status);
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!',
-            });
-        }
-    } catch (error) {
-        console.log(error.message);
-        Swal.fire({
-            title: 'Product Added to Cart',
-            text: 'The selected product has been added to your cart.',
-            icon: 'success',
-            confirmButtonColor: '#28a745',
-            confirmButtonText: 'OK'
-        });
+        window.location.href = '/usershop?' + params.toString();
     }
-}
-
-function toggleReadMore(event) {
-    const productNameElement = event.target.previousElementSibling;
-    if (productNameElement.classList.contains('expanded')) {
-        productNameElement.classList.remove('expanded');
-        productNameElement.classList.add('collapsed');
-        event.target.innerText = 'More';
-    } else {
-        productNameElement.classList.add('expanded');
-        productNameElement.classList.remove('collapsed');
-        event.target.innerText = 'Less';
+    
+    // Function to sort products by name
+    function sortProductsByName(sortOrder) {
+         const currentUrl = window.location.href;
+        const url = new URL(currentUrl);
+        const params = new URLSearchParams(url.search);
+        if (sortOrder == 'name_aA_to_zZ') {
+            params.set('sort', 'name_aA_to_zZ')
+        } else if (sortOrder === 'name_Aa_to_Zz') {
+            params.set('sort', 'name_Aa_to_Zz');
+        }
+    
+        window.location.href = `/usershop?cat=${categoryid}&search=${searchInput}&${params.toString()}` ;
+       }
+    
+    function toggleOutOfStock() {
+        var hideOutOfStock = document.getElementById("hideOutOfStockCheckbox").checked;
+        // Redirect to the shop page with the updated hideOutOfStock query parameter
+        window.location.href = "/usershop?hideOutOfStock=" + hideOutOfStock;
     }
-}
-</script>
-
-<div class="container my-4"> 
-    <div class="row">
-        <!-- Sidebar Section Begin -->
-        <div class="col-lg-3">
-            <div class="shop__sidebar">
-                <div class="shop_sidebar_accordion">
-                    <div class="accordion" id="accordionExample">
-                        <div class="card">
-                            <div class="card-heading">
-                                <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
-                            </div>
-                            <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
-                                <div class="card-body">
-                                    <div class="shop__sidebar__categories">
-                                        <ul class="nice-scroll">
-                                            <li><a href="/usershop?cat=All">All</a></li>
-                                            <% categories.forEach(category => { %>
-                                                <li><a href="/usershop?cat=<%= category._id %>"><%= category.name %></a></li>
-                                            <% }); %>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Sidebar Section End -->
-
-        <div class="col-lg-9">
-            <div class="tab-content wow fadeIn animated" id="myTabContent">
-                <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
-                    <div class="shop__product__option">
-                        <div class="shop__product__option__right">
-                            <label for="sortPrice">Price:</label>
-                            <select id="sortPrice" onchange="sortProductsByPrice(this.value)">
-                                <option value="low_to_high">Low to High</option>
-                                <option value="high_to_low">High to Low</option>
-                            </select>
-                        </div>
-                        <div class="shop__product__option__right">
-                            <label for="sortName">Name:</label>
-                            <select id="sortName" onchange="sortProductsByName(this.value)">
-                                <option value="aA_to_zZ">aA - zZ</option>
-                                <option value="Aa_to_Zz">Aa - Zz</option>
-                            </select>
-                        </div>
-                        <div class="shop__product__option__right">
-                            <input type="checkbox" id="hideOutOfStockCheckbox" class="width:50px;height:50px" onchange="toggleOutOfStock()">
-                            <label for="hideOutOfStockCheckbox">Hide Out of Stock</label>
-                        </div>
-                    </div>
-                    <br>
-
-                    <div class="row product-grid-4">
-                        <% data.forEach((row,index)=>{ %>
-                            <% if (!row.isBlocked && row.category.islisted) { %>
-                                <div class="col-lg-3 col-md-4 col-12 col-sm-6">
-                                    <div class="product-cart-wrap mb-30">
-                                        <div class="product-img-action-wrap">
-                                            <div class="product-img product-img-zoom">
-                                                <a href="/productdetails/<%= row._id %>">
-                                                    <img class="default-img" src="/public/photos/<%= row.productImage[0] %>"  alt="<%= row.productName %>">
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="product-content-wrap">
-                                            <div class="product-name collapsed">
-                                                <a href="/productdetails/<%= row._id %>"><%= row.productName %></a>
-                                            </div>
-                                            <a class="read-more-link" onclick="toggleReadMore(event)">ReadMore</a>
-                                           
-                                            <span style="color: black;"> ( <%= row.stock %> Left) </span>
-                                            <!-- <div class="product-category">
-                                                <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
-                                            </div> -->
-                                            <div class="rating-result" title="90%">
-                                                <span>
-                                                    <span>90%</span>
-                                                </span>
-                                            </div>
-                                            <div class="product-price">
-                                                <span>₹<%= row.oldPrice %></span>
-                                                <% if (row.discount) { %>
-                                                    <span class="old-price"><%= row.discount %>% OFF</span>
-                                                <% } %>
-                                            </div>
-                                            <div class="product-action-1 show">
-                                                <a aria-label="Add To Cart" class="action-btn hover-up" href="#" onclick="addToCart('<%= row._id %>')"><i class="fi-rs-shopping-bag-add"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <% } %>
-                        <% }); %>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Pagination Section Begin -->
-<div class="pagination-area mt-15 mb-50">
-    <nav aria-label="Page navigation example">
-        <ul class="pagination justify-content-center">
-            <% if (currentPage > 1) { %>
+    // Function to update pagination
+    function updatePagination(data) {
+        const paginationArea = document.querySelector('.pagination-area .pagination');
+        paginationArea.innerHTML = '';
+        if (data.hasPrevPage) {
+            paginationArea.innerHTML += `
                 <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>&cat=<%= cat %>">
+                    <a class="page-link" href="#" onclick="changePage(${data.prevPage})">
                         <i class="material-icons md-chevron_left"></i>
                     </a>
                 </li>
-            <% } %>
-            <% for (let i = 1; i <= lastPage; i++) { %>
-                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                    <a class="page-link" href="?page=<%= i %>&search=<%= search %>&cat=<%= cat %>"><%= i < 10 ? '0' + i : i %></a>
+            `;
+        }
+        for (let i = 1; i <= data.lastPage; i++) {
+            paginationArea.innerHTML += `
+                <li class="page-item ${i === data.currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${i})">${i < 10 ? '0' + i : i}</a>
                 </li>
-            <% } %>
-            <% if (currentPage < lastPage) { %>
+            `;
+        }
+        if (data.hasNextPage) {
+            paginationArea.innerHTML += `
                 <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>&cat=<%= cat %>">
+                    <a class="page-link" href="#" onclick="changePage(${data.nextPage})">
                         <i class="material-icons md-chevron_right"></i>
                     </a>
                 </li>
-            <% } %>
-        </ul>
-    </nav>
-</div>
+            `;
+        }
+    }
+    
+    // Function to change the page
+    function changePage(page) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', page);
+        window.history.pushState({}, '', '?' + params.toString());
+        fetchProducts();
+    }
+    
+    // Function to fetch products
+    function fetchProducts() {
+            const params = new URLSearchParams(window.location.search);
+            axios.get('/usershop', { params })
+                .then(response => {
+                    console.log('Products fetched:', response.data);
+
+                    // Check if the response is a string and needs to be parsed
+                    let products;
+                    if (typeof response.data === 'string') {
+                        products = JSON.parse(response.data).data;
+                    } else {
+                        products = response.data.data; // Adjust based on actual structure
+                    }
+
+                    updateProductArea(products);
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                });
+        }
+
+        function updateProductArea(products) {
+            const productArea = document.getElementById('product-area');
+            productArea.innerHTML = '';
+
+            if (products && Array.isArray(products)) {
+                products.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.textContent = product.name;
+                    productArea.appendChild(productDiv);
+                });
+            } else {
+                console.error('Unexpected data structure:', products);
+                productArea.textContent = 'No products found.';
+            }
+        }
+ 
+   async function addToCart(productId) {
+    try {
+            event.preventDefault();
+            const response = await axios.post('/addtocart', { productId });
+            if (!response.data.login) {
+                return window.location.href = '/userlogin';
+            }
+            if( response.data.newItem === true ){
+                                
+                    Swal.fire({
+                        title: 'Product Added to Cart',
+                        text: 'The selected product has been added to your cart.',
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/viewcart'; // Redirect to the viewcart page
+                                }
+                            });
+            }
+        }
+        catch (error) {
+        if (error.response && error.response.status === 404) {
+                console.log("Inside 404 handling");
+                return Swal.fire({
+                    title: 'Product Out of Stock',
+                    text: "You've reached the maximum quantity of products available for purchase.",
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/viewcart'; // Redirect to the viewcart page
+                            }
+                        });
+
+            } else
+            {
+        Swal.fire({
+            title: 'Error Adding Product to Cart',
+            text: error,
+            icon: 'error',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+        });
+    }
+    }
+}
+</script>
+    
+<main class="main">
+    <section class="product-tabs pt-25 pb-20 wow fadeIn animated">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="widget-category mb-30">
+                        <h5 class="section-title style-1 mb-30 wow fadeIn animated">Category</h5>
+                        <ul class="categories">
+                            <li><a href="/usershop?cat=All">All</a></li>
+                            <% categories.forEach(category => { %>
+                                <!-- <li><a href="/usershop?cat=<%= category._id %>"><%= category.name %></a></li> -->
+
+                                <li><a href="#" onclick="return categoryandsearch('<%= category._id %>')" ><%= category.name %></a></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                    <div class="widget-category mb-30">
+                        <h5 class="section-title style-1 mb-30 wow fadeIn animated">Sort by</h5>
+                        <ul class="categories">
+                            
+                            <li><a href="#" onclick="sortProductsByPrice('price_aA_to_zZ')" >Price: Low to High</a></li>
+                            <li><a href="#" onclick="sortProductsByPrice('price_Aa_to_Zz')" >Price: High to Low</a></li>
+                            <li><a href="#" onclick="sortProductsByName('name_aA_to_zZ')" > Name: Low to High</a></li>
+                            <li><a href="#" onclick="sortProductsByName('name_Aa_to_Zz')" >Name: High to Low</a></li>
+                           
+                        </ul>
+                    </div>
+                    <div class="widget-category mb-30">
+                        <div >
+                        <ul class="categories ">
+                            <li>
+                        <!-- <h5 class="section-title style-1 mb-30 wow fadeIn animated">Hide Out of stock</h5> -->
+                        <input type="checkbox" id="hideOutOfStockCheckbox"  style="width:100; height : 50px" onchange="toggleOutOfStock()">
+                        <label for="hideOutOfStockCheckbox">Hide Out of Stock</label></li> 
+                    </ul>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="tab-header">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="nav-tab-one" data-bs-toggle="tab" data-bs-target="#tab-one" type="button" role="tab" aria-controls="tab-one" aria-selected="true">Products</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="nav-tab-two" data-bs-toggle="tab" data-bs-target="#tab-two" type="button" role="tab" aria-controls="tab-two" aria-selected="false">Popular</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="nav-tab-three" data-bs-toggle="tab" data-bs-target="#tab-three" type="button" role="tab" aria-controls="tab-three" aria-selected="false">New added</button>
+                            </li>
+                        </ul>
+                        <!-- <a href="#" class="view-more d-none d-md-flex">View More<i class="fi-rs-angle-double-small-right"></i></a> -->
+                    </div>
+                    <!--End nav-tabs-->
+                    <div class="tab-content wow fadeIn animated" id="myTabContent">
+                        <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                            <div class="product-grid-4">
+                                <% data.forEach((row, index) => { %>
+                                    <% if (!row.isBlocked && row.category.islisted) { %>
+                                        <div class="col-lg-3 col-md-3 col-12 col-sm-6">
+                                        <div class="product-cart-wrap mb-30">
+                                            <div class="product-img-action-wrap">
+                                                <div class="product-img product-img-zoom">
+                                                    <a href="/productdetails/<%= row._id %>">
+                                                        <img class="default-img" src="/public/photos/<%= row.productImage[0] %>" alt="<%= row.productName %>">
+                                                        <img class="hover-img" src="/public/photos/<%= row.productImage[0] %>" alt="">
+                                                    </a>
+                                                </div>
+                                                <!-- <div class="product-action-1">
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                </div> -->
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="hot">(<%= row.stock %> Left)</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-content-wrap">
+                                                <div class="product-category">
+                                                    <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
+                                                </div>
+                                                <h2><a href="/productdetails/<%= row._id %>"><%= row.productName %></a></h2>
+                                                <div class="rating-result" title="90%">
+                                                    <span>
+                                                        <span>90%</span>
+                                                    </span>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span class="old-price">₹<%= row.oldPrice %></span><br>
+                                                    <span class="discounted-price">₹<%= row.regularPrice %></span>
+                                                    <% if (row.discount) { %>
+                                                        <div class="save-amount">Saved 5%</div>
+                                                    <% } %>
+                                                </div>
+                                                <div class="product-action-1 show">
+                                                    <button onclick="addToCart('<%= row._id %>')" class="action-btn hover-up"><i class="fi-rs-shopping-cart"></i></button>
+                                                </div>
+                                            </div>
+                            
+                                        </div>
+                                        </div>
+                                    <% } %>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
+                            <div class="product-grid-4">
+                                <% data.forEach((row, index) => { %>
+                                    <% if (!row.isBlocked && row.category.islisted) { %>
+                                        <div class="col-lg-3 col-md-3 col-12 col-sm-6">
+                                        <div class="product-cart-wrap mb-30">
+                                            <div class="product-img-action-wrap">
+                                                <div class="product-img product-img-zoom">
+                                                    <a href="/productdetails/<%= row._id %>">
+                                                        <img class="default-img" src="/public/photos/<%= row.productImage[0] %>" alt="<%= row.productName %>">
+                                                        <img class="hover-img" src="/public/photos/<%= row.productImage[0] %>" alt="">
+                                                    </a>
+                                                </div>
+                                                <!-- <div class="product-action-1">
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                </div> -->
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="hot">(<%= row.stock %> Left)</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-content-wrap">
+                                                <div class="product-category">
+                                                    <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
+                                                </div>
+                                                <h2><a href="/productdetails/<%= row._id %>"><%= row.productName %></a></h2>
+                                                <div class="rating-result" title="90%">
+                                                    <span>
+                                                        <span>90%</span>
+                                                    </span>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span class="old-price">₹<%= row.oldPrice %></span><br>
+                                                    <span class="discounted-price">₹<%= row.regularPrice %></span>
+                                                    <% if (row.discount) { %>
+                                                        <div class="save-amount">Saved 5%</div>
+                                                    <% } %>
+                                                </div>
+                                                <div class="product-action-1 show">
+                                                    <button onclick="addToCart('<%= row._id %>')" class="action-btn hover-up"><i class="fi-rs-shopping-cart"></i></button>
+                                                </div>
+                                            </div>
+                            
+                                        </div>
+                                        </div>
+                                    <% } %>
+                                <% }); %>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-three" role="tabpanel" aria-labelledby="tab-three">
+                            <div class="product-grid-4">
+                                <% newproducts.forEach((row, index) => { %>
+                                    <% if (!row.isBlocked && row.category.islisted) { %>
+                                        <div class="col-lg-3 col-md-3 col-12 col-sm-6">
+                                        <div class="product-cart-wrap mb-30">
+                                            <div class="product-img-action-wrap">
+                                                <div class="product-img product-img-zoom">
+                                                    <a href="/productdetails/<%= row._id %>">
+                                                        <img class="default-img" src="/public/photos/<%= row.productImage[0] %>" alt="<%= row.productName %>">
+                                                        <img class="hover-img" src="/public/photos/<%= row.productImage[0] %>" alt="">
+                                                    </a>
+                                                </div>
+                                                <!-- <div class="product-action-1">
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                </div> -->
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="hot">(<%= row.stock %> Left)</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-content-wrap">
+                                                <div class="product-category">
+                                                    <a href="/productdetails/<%= row._id %>"><%= row.category.name %></a>
+                                                </div>
+                                                <h2><a href="/productdetails/<%= row._id %>"><%= row.productName %></a></h2>
+                                                <div class="rating-result" title="90%">
+                                                    <span>
+                                                        <span>90%</span>
+                                                    </span>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span>₹<%= row.regularPrice %></span>
+                                                    <span class="old-price"><%= row.discountPrice ? `₹${row.discountPrice}` : '' %></span>
+                                                </div>
+                                                <div class="product-action-1 show">
+                                                    <button onclick="addToCart('<%= row._id %>')" class="action-btn hover-up"><i class="fi-rs-shopping-cart"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    <% } %>
+                                <% }); %>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                    <!--End tab-content-->
+                </div>
+            </div>
+            </div>
+            </section>
+            <section class="pt-25 pb-15">
+                <!-- Pagination Section Begin -->
+       <div class="pagination-area mt-15 mb-50">
+           <nav aria-label="Page navigation example">
+               <ul class="pagination justify-content-center">
+                   <% if (currentPage > 1) { %>
+                       <li class="page-item">
+                           <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>&cat=<%= cat %>">
+                               <i class="material-icons md-chevron_left"></i>
+                           </a>
+                       </li>
+                   <% } %>
+                   <% for (let i = 1; i <= lastPage; i++) { %>
+                       <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                           <a class="page-link" href="?page=<%= i %>&search=<%= search %>&cat=<%= cat %>"><%= i < 10 ? '0' + i : i %></a>
+                       </li>
+                   <% } %>
+                   <% if (currentPage < lastPage) { %>
+                       <li class="page-item">
+                           <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>&cat=<%= cat %>">
+                               <i class="material-icons md-chevron_right"></i>
+                           </a>
+                       </li>
+                   <% } %>
+               </ul>
+           </nav>
+       </div>
+       </section>
+           
+
+
 <!-- Pagination Section End -->
 
+    
+</main>
 <%- include ('../partials/userfooter') %>

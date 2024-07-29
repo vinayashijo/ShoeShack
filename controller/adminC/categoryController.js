@@ -10,6 +10,7 @@ const loadcategorylist = async function(req, res) {
       const {error}=req.flash() 
       const {message}=req.flash()
       let {page} = req.query
+
        if(!page)
        {
         page= 1
@@ -17,8 +18,7 @@ const loadcategorylist = async function(req, res) {
       
       const ITEMS_PER_PAGE = pageHelper.CATEGORY_PER_PAGE
       const categoryTotalCount = await  categoryModel.find().count()
-
-      console.log("categorycount,itemsperpage",categoryTotalCount)
+      console.log("categorycount,itemsperpage",categoryTotalCount,ITEMS_PER_PAGE)
 
       res.render('admin/category-list', { data: data, error:error, message:message,
         currentPage : page,
@@ -36,7 +36,6 @@ const loadcategorylist = async function(req, res) {
 
 };
 
-
 //addtocategory page---------------------------------------------------------------------
 const loadaddToCategory = async(req,res)=>{
   try {
@@ -53,9 +52,26 @@ const loadaddToCategory = async(req,res)=>{
               islisted:true
             }   
             
-           await categoryModel.create(categoryadded)
-           console.log("Category added successfully")
+           const id = await categoryModel.create(categoryadded)
+           console.log("Category added successfully", id)
 
+           if (offer && offer > 0 )
+           {
+                const offerCatproducts = await ProductModel.find({category : id,discount : {$gt : 0} })
+                if(offerCatproducts)
+                {
+                  offerCatproducts.array.forEach(element => {
+
+                  offerCatproducts.array.forEach(element => {
+                    const cDiscount  =  offer
+                    const pDiscount  =  element.discount
+                    if(cDiscount > pDiscount )
+                    {
+                        
+                    }
+                  });
+                }
+           }
             res.redirect("/categorylist");
           
        }else{
@@ -67,7 +83,6 @@ const loadaddToCategory = async(req,res)=>{
     console.log(error.message)
   }
 }
-
 
 //list&unlist function-----------------------------------------------------
 const loadunlistorlist = async (req, res) => {
@@ -96,7 +111,6 @@ const loadunlistorlist = async (req, res) => {
   }
 };
 
-
 //edit category page------------------------------------------------
 const loadeditcategorypage=async function(req, res) {
   try {
@@ -110,7 +124,6 @@ const loadeditcategorypage=async function(req, res) {
       res.status(500).send("Internal Server Error");
   }
 };
-
 
 //update category function-----------------------------------------------------------
 const updateCategory = async (req, res) => {
@@ -142,7 +155,6 @@ const updateCategory = async (req, res) => {
     res.redirect("/categorylist");
   }
 };
-
 
 module.exports={
   loadaddToCategory,
