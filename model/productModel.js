@@ -51,6 +51,11 @@ const productSchema = mongoose.Schema({
     required:true,  
  
   },
+  isCatgegoryOfferApplied: {
+    type: Boolean,
+    default: false,
+  },
+
 });
 
 const product = mongoose.model("product", productSchema);
