@@ -57,18 +57,22 @@ const loadaddToCategory = async(req,res)=>{
 
            if (offer && offer > 0 )
            {
-                const offerCatproducts = await ProductModel.find({category : id,discount : {$gt : 0} })
+                const offerCatproducts = await ProductModel.find({category : id})
+                const regularPrice = offerCatproducts.regularPrice
+                const oldPrice = offerCatproducts.oldPrice
+                const discount = offerCatproducts.discount
+
                 if(offerCatproducts)
                 {
-                  offerCatproducts.array.forEach(element => {
-
-                  offerCatproducts.array.forEach(element => {
+                  offerCatproducts.array.forEach(element => 
+                    {
                     const cDiscount  =  offer
                     const pDiscount  =  element.discount
                     if(cDiscount > pDiscount )
                     {
-                        
+                          oldPrice =   oldPrice - (cDiscount * .01)
                     }
+
                   });
                 }
            }
