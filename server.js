@@ -31,6 +31,12 @@ app.use(session({
 // Flash messages middleware
 app.use(flash());
 
+app.use((req,res,next) =>{
+  res.locals.message = req.flash();
+  next();
+});
+
+
 //setup view engine and static file serving
 app.set('view engine','ejs')
 app.set('views', path.join(__dirname, 'views'));
@@ -54,7 +60,8 @@ app.use('/',adminAuthRoute)
 app.use(errorHandler);
 
 ///start server
-const port=process.env.port||3000
+const port=process.env.port||3001
+
 app.listen(port,()=>{
   console.log(`server running on http://localhost:${port}`);
 })

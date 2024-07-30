@@ -1,299 +1,358 @@
-<%- include ('../partials/adminheader') %>
+<%- include('../partials/adminheader') %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+
 <main>
-<section class="content-main" style="background-color: white;">
-  <div class="content-header">
+  <section class="content-main" style="background-color: white;">
+    <div class="content-header">
       <div>
-          <h2 class="content-title card-title">Add New Product</h2>
-          
-          <span class="text-center w-50 mx-auto" style=" display: block;  color: rgb(23, 200, 14);" id="errormessage"></span>
-         
+        <h2 class="content-title card-title">Add New Product</h2>
+        <span class="text-center w-50 mx-auto" style="display: block; color: rgb(23, 200, 14);" id="errormessage"></span>
       </div>
-  </div>
-  <div class="card mb-4">
-      <div class="card-body">
+    </div>
+    <div class="row">
+      <!-- Left Side (Form) -->
+      <div class="col-lg-6">
+        <div class="card mb-4">
           <div class="card-body">
-            <form method="post"  id="productform"  enctype="multipart/form-data" >  
-                  <div class="col-lg-4 mb-4">
-                      <label for="product_name" class="form-label">Product Name</label>
-                      <input type="text" placeholder="Type here" name="productName" class="form-control border" id="productnameX">
-                      <div id="productName-error" class="error-message"></div>
+            <form method="post" id="productform" action="/addproducts" enctype="multipart/form-data">
+              <div class="col-md-12 mb-4">
+                <label class="form-label">Product Name</label>
+                <input type="text" placeholder="Type here" name="productName" class="form-control border" id="productnameX">
+                <div id="productName-error" class="error-message"></div>
+              </div>
+              <div class="col-md-12 mb-4">
+                <label class="form-label">Brand Name</label>
+                <input type="text" placeholder="Type here" name="brandName" class="form-control border" id="brandnameX">
+                <div id="brandName-error" class="error-message"></div>
+              </div>
+              <div class="col-md-12 mb-4">
+                <label class="form-label">Full description</label>
+                <textarea placeholder="Type here" name="description" id="descriptionX" class="form-control border" rows="4"></textarea>
+                <div id="description-error" class="error-message"></div>
+              </div>
+              <div class="row col-md-12 mb-4">
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label">Regular price</label>
+                    <input placeholder="$" id="regularPriceX" name="oldPrice" type="text" class="form-control border">
+                    <div id="regularPrice-error" class="error-message"></div>
                   </div>
-                  <div class="col-lg-4 mb-4">
-                      <label class="form-label">Brand Name</label>
-                      <input type="text" placeholder="Type here" name="brandName" class="form-control border" id="brandnameX">
-                      <div id="brandName-error" class="error-message"></div>
-                  </div>
-                  <div class="mb-4">
-                      <label class="form-label">Full description</label>
-                      <textarea placeholder="Type here" name="description"  id="descriptionX" class="form-control border" rows="4"></textarea>
-                      <div id="description-error" class="error-message"></div>
-                  </div>
-                  <div class="row">
-                      <div class="col-lg-4">
-                          <div class="mb-4">
-                              <label class="form-label">Regular price</label>
-                              <input placeholder="$"  id="regularPriceX"  name="oldPrice" type="text" class="form-control border">
-                              <div id="regularPrice-error" class="error-message"></div>
-              
-                          </div>
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label">Discount</label>
+                    <div class="input-group">
+                      <input placeholder="$" id="discountX" name="discount" type="text" class="form-control border">
+                      <div class="input-group-append">
+                        <span class="input-group-text" style="background-color: #fff; border: none; border-left: 1px solid #ced4da;">%</span>
                       </div>
-                      <div class="col-lg-4">
-                          <div class="mb-4">
-                              <label class="form-label">Discount</label>
-                              <div class="input-group">
-                                  <input placeholder="$" id="discountX" name="discount" type="text" class="form-control border">
-                                  <div class="input-group-append">
-                                      <span class="input-group-text" style="background-color: #fff; border: none; border-left: 1px solid #ced4da;">%</span>
-                                  </div>
-                              </div>
-                              <div id="discount-error" class="error-message"></div>
-                          </div>
-                          
-                      </div>
-                      <div class="col-lg-4">
-                          
-                      </div>
-
-                  </div>
-                  <div class="row">
-                    <div class="col-lg-4">
-                        <div class="mb-4">
-                            <label class="form-label">Stock </label>
-                            <input placeholder="Enter total stock quantity" id="stockQuantity" name="stock" type="text" class="form-control border">
-                            <div id="stock-error" class="error-message"></div>
-                        </div>
                     </div>
+                    <div id="discount-error" class="error-message"></div>
+                  </div>
                 </div>
-                
-                  <div class="row">
-                      <div class="col-lg-4 offset-lg-4"> 
-                          <div id="sumquantity-error" class="error-message"></div>
-                      </div>
+              </div>
+              <div class="col-md-12 mb-4">
+                <div class="row">
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label">Stock</label>
+                    <input placeholder="Type here" id="stockQuantity" name="stock" type="text" class="form-control border">
+                    <div id="stock-error" class="error-message"></div>
                   </div>
-                  <div class="card mb-4">
-                      <div class="card-body">
-                          <div class="row gx-2">
-                              <div class="col-sm-6 mb-3">
-                                  <label class="form-label">Category</label>
-                                  <select class="form-select border" style="width: 150px;" name="category" required>
-                                    <option value="" >- Select Category -</option>
-                                    <% for (let i=0; i < cat.length; i++) { %>
-                                        <option value="<%= cat[i]._id %>">
-                                            <%= cat[i].name %>
-                                        </option>
-                                        <% } %>
-                                </select>
-                              </div>
-                          </div>
-                      </div>
+                  <div class="col-md-6 mb-4">
+                    <label class="form-label">Category</label>
+                    <select class="form-select border" style="width: 150px;" name="category" id="categoryX" required>
+                      <option value="">- Select Category -</option>
+                      <% for (let i=0; i < cat.length; i++) { %>
+                        <option value="<%= cat[i]._id %>">
+                          <%= cat[i].name %>
+                        </option>
+                      <% } %>
+                    </select>
                   </div>
-                  <div class="card mb-2">
-                      <div class="card-header">
-                          <h4>Choose images</h4>
-                      </div>
-                      <div class="border row">
-                          <div id="addedImagesContainer" class="thumbnails-container" style="display: flex;"></div>
-                      </div>
-                      <div class="card-body">
-                          <div class="input-upload">
-                              <img src="assets/imgs/theme/upload.svg" alt="">
-                              <input class="form-control border" name="images" id="imageInput" type="file" multiple>
-                              <span id="fileerrormessage" class="text-center w-50 mx-auto" style="display: block;color: red; "></span>
-                          </div>
-                      </div>
-                  </div>
-                  <div>
-                    <input class="btn btn-md rounded font-sm" id="formsubmit" type="submit" value="Publish" style="background-color: rgb(21, 119, 204);color: white; margin-bottom: 10px;">
+                </div>
+              </div>
+              <div class="col-md-12 offset-lg-4">
+                <div id="sumquantity-error" class="error-message"></div>
+              </div>
+              <div id="hiddenContainer"></div> <!-- Hidden container for crop data -->
+              <div class="col-lg-12">
+                <div class="card mb-4">
+                  <div class="card-body text-center">
+                    <input class="btn btn-primary rounded font-md" id="formsubmit" type="submit" value="Submit">
                     <span id="successMessage" style="display: none; background-color: #d4edda; color: #155724; border-color: #c3e6cb; padding: 5px; border-radius: 5px; margin-top: 10px;"></span>
-                    
                   </div>
-              </form>
-
-</script>
-      
-      </div> <!-- card-body end// -->     
-  </div> <!-- card end// -->
-</section> <!-- content-main end// -->
-
-<footer class="main-footer font-xs">
-  <div class="row pb-30 pt-15">
-      <div class="col-sm-6">
-          <script>
-          document.write(new Date().getFullYear())
-          </script> ©, ShoeShack - HTML Ecommerce Template .
-      </div>
-      <div class="col-sm-6">
-          <div class="text-sm-end">
-              All rights reserved
+                </div>
+              </div>
+           
           </div>
+        </div>
       </div>
+      <!-- Right Side (Image Upload & Crop) -->
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5>Upload & Crop Images</h5>
+            <div class="form-group">
+              <!-- <label for="fileInput">Image</label> -->
+              <div class="input-group col-xs-12">
+                <input id="fileInput" type="file" name="images" multiple class="form-control btn btn-primary" placeholder="Upload Image">
+                <div id="errorImage" class="alert-danger" style="display: none;"></div>
+              </div>
+              <h5>Selected Images</h5>
+              <div id="imageContainer" class="row m-3"></div>
+            </div>
+            <div id="preview" class="mt-5">
+              <h5>Cropped Images</h5>
+              <div class="row" id="croppedImages"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  </section>
+
+  <!-- Modal for Image Cropping -->
+  <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cropModalLabel">Crop Image</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="img-container">
+            <img id="imageToCrop" src="" class="img-fluid">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="cropButton" class="btn btn-primary">Crop</button>
+        </div>
+      </div>
+    </div>
   </div>
-</footer>
+
+  <footer class="main-footer font-xs">
+    <div class="row pb-30 pt-15">
+      <div class="col-sm-6">
+        <script>
+          document.write(new Date().getFullYear())
+        </script> ©, ShoeShack - HTML Ecommerce Template.
+      </div>
+      <div class="col-sm-6">
+        <div class="text-sm-end">
+          All rights reserved
+        </div>
+      </div>
+    </div>
+  </footer>
 </main>
-<script src="/public/admin/assets/js/vendors/jquery-3.6.0.min.js"></script>
-<script src="/public/admin/assets/js/vendors/bootstrap.bundle.min.js"></script>
-<script src="/public/admin/assets/js/vendors/select2.min.js"></script>
-<script src="/public/admin/assets/js/vendors/perfect-scrollbar.js"></script>
-<script src="/public/admin/assets/js/vendors/jquery.fullscreen.min.js"></script>
-<script src="/public/admin/assets/js/vendors/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<!-- Main Script -->
-<script src="/public/admin/assets/js/main.js" type="text/javascript"></script>
-<script src="/public/admin/assets/js/custom-chart.js" type="text/javascript"></script>
+
+<!-- Include jQuery and Cropper.js libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 
 <script>
-    
-$('#formsubmit').click(function(event) {
-    event.preventDefault(); 
-    if (validateAndSubmit()) {
-        submitFormData(); 
-    }
-});
+  let cropper;
+  const fileInput = document.getElementById('fileInput');
+  const imageContainer = document.getElementById('imageContainer');
+  const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+  const imageToCrop = document.getElementById('imageToCrop');
+  const cropButton = document.getElementById('cropButton');
+  const hidden = document.getElementById('hiddenContainer');
 
-function submitFormData() {
-    
-    
-    var formData = new FormData($('#productform')[0]);
+  
+  let index;
 
-   
-    $.ajax({
-        url: '/addproducts',
-        method: 'POST', 
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function(response) {
-            if (response.errormessage && response.success === false) {
-                document.getElementById("errormessage").innerHTML = response.errormessage;
+  // Image selection and display logic
+  fileInput.addEventListener('change', (event) => {
+    const files = event.target.files;
+    imageContainer.innerHTML = ''; // Clear previous images
 
-                setTimeout(function() {
-                    document.getElementById("errormessage").innerHTML = "";
-                }, 9000);
-            }
-            
-            if (response.fileerrormessage && response.success === false) {
-                document.getElementById("fileerrormessage").innerHTML = response.fileerrormessage;
-                // console.log(response.fileerrormessage);
-                
-                
-                setTimeout(function() {
-                    document.getElementById("fileerrormessage").innerHTML = "";
-                }, 5000);
-            }
-            
-            if (response.success === true && response.message) {
-         
-         var publishMessage = document.getElementById("successMessage");
-             publishMessage.textContent = response.message;
-             publishMessage.style.display = "block";
-             publishMessage.style.backgroundColor = "#28a745";
-             publishMessage.style.color = "white";  
-    
-                      
-                             setTimeout(function() {
-                                location.reload()
-                             },5000);
-     }
-            if (response.status===false && response.message) {
-         var publishMessage = document.getElementById("successMessage");
-             publishMessage.textContent = response.message;
-             publishMessage.style.display = "block";
-             publishMessage.style.backgroundColor = "#dc3545";
-             publishMessage.style.color = "white";
-            }    
-        },
-        error: function(error) {
-            
-            console.error(xhr.responseText);
-            
-        }
+    Array.from(files).forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imgItem = document.createElement('div');
+        imgItem.className = 'col-md-3 image-item';
+
+        imgItem.innerHTML = `
+          <div class="row">
+            <div class="col-md-9">
+              <img  style="height:50px;width:100px" src="${e.target.result}" alt="Image ${idx + 1}" >
+            </div>
+            <div class="col-md-3 text-center">
+              <button class="btn btn-primary crop-button p-3" data-index="${idx}" data-image="${e.target.result}"> Crop </button>
+            </div>
+          </div>
+        `;
+
+        imageContainer.appendChild(imgItem);
+      };
+
+      reader.readAsDataURL(file);
     });
+  });
+
+  // Crop button event listener
+  imageContainer.addEventListener('click', (event) => {
+    if (event.target.classList.contains('crop-button')) {
+      index = event.target.getAttribute('data-index');
+      imageToCrop.src = event.target.getAttribute('data-image');
+      cropModal.show();
+    }
+  });
+
+  // Initialize cropper when modal is shown
+  cropModal._element.addEventListener('shown.bs.modal', () => {
+    cropper = new Cropper(imageToCrop, {
+      aspectRatio: 1,
+      viewMode: 1,
+    });
+  });
+
+  // Crop button click event
+  cropButton.addEventListener('click', () => {
+    if (cropper) {
+      const croppedCanvas = cropper.getCroppedCanvas();
+      const croppedImage = croppedCanvas.toDataURL('image/png');
+
+      const imgElement = document.createElement('img');
+      imgElement.src = croppedImage;
+      imgElement.className = 'img-thumbnail';
+      const imgWrapper = document.createElement('div');
+      imgWrapper.className = 'col-md-3';
+      imgWrapper.appendChild(imgElement);
+      
+      document.getElementById('croppedImages').appendChild(imgWrapper);
+
+      
+      // Extract dimensions.
+      let dimension = cropper.getData();
+    const delimiter = '|';
+    const values = [ index,dimension.x , dimension.y , dimension.height , dimension.width ];
+    const imageData = values.join(delimiter);
+    console.log("Values = ",imageData);
+    createHiddenInput(index,imageData,hidden);
+
+    cropper.destroy();
+    cropModal.hide();
+    } 
+  });
+
+      // canvas.toBlob((blob) => {
+      //   const reader = new FileReader();
+      //   reader.onload = (e) => {
+      //     createHiddenInput(index, e.target.result, hiddenContainer);
+
+
+      //     const imgWrapper = document.createElement('div');  //this imagwrapper is to reduce the size of cropped image
+      //     imgWrapper.className ="col-md-3"
+
+
+      //     const img = document.createElement('img');
+      //     img.src = e.target.result;
+      //     img.className = 'img-thumbnail';
+
+      //     imgWrapper.appendChild(img)
+
+  //     //     document.getElementById('croppedImages').appendChild(imgWrapper);
+  //       // };
+  //       reader.readAsDataURL(blob);
+  //     });
+  //     cropper.destroy();
+  //     cropModal.hide();
+  //   }
+  // });
+
+  // Create hidden input field for storing cropped coordinates !!
+function createHiddenInput(index,data,parent){
+     const input = document.createElement('input');
+     console.log("INdex value ::"+index);
+     input.type ='hidden';
+     input.name ='cropImage'+index;
+     input.value = data;
+     console.log("Hidden Field"+input.value+input.name)
+     parent.appendChild(input);
 }
 
-function validateAndSubmit() {
-    if (validateForm()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-    
-  function validateForm() {
-    resetErrorMessages();
+  // function createHiddenInput(index, data, parent) {
+  //   if (!parent) {
+  //     console.error('Parent container not found for hidden input');
+  //     return;
+  //   }
 
-    let isValid = true;
-    const productname = document.getElementById("productnameX").value.trim();
-    const description = document.getElementById("descriptionX").value.trim();
-    const brand = document.getElementById("brandnameX").value.trim();
-    const oldPrice = parseFloat(document.getElementById("regularPriceX").value);
-    const discount = parseFloat(document.getElementById("discountX").value);
-    const stock = parseFloat(document.getElementById("stockQuantity").value);
-   
+  //   const input = document.createElement('input');
+  //   input.type = 'hidden';
+  //   input.name = 'cropImage' + index;
+  //   input.value = data;
 
-    if (productname === "" ) {
-        displayErrorMessage("productName-error", "Product Name is required");
-        isValid = false;
-    }
 
-    if (description === "") {
-        displayErrorMessage("description-error", "Description is required");
-        isValid = false;
-    }
+  //   parent.appendChild(input);
+  // }
 
-    if (brand === "") {
-        displayErrorMessage("brandName-error", "Brandname is required");
-        isValid = false;
+  // Form validation and submission
+  document.getElementById('formsubmit').addEventListener('click', (event) => {
+    event.preventDefault();
+    let valid = true;
+    const form = document.getElementById('productform');
+
+    // Clear previous error messages
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+    // Validate product name
+    const productName = document.getElementById('productnameX').value.trim();
+    if (!productName) {
+      document.getElementById('productName-error').textContent = 'Product Name is required';
+      valid = false;
     }
 
-    if ( oldPrice <= 0) {
-        displayErrorMessage("regularPrice-error", "Regular price must be a valid positive number");
-        isValid = false;
-    }else if (isNaN(oldPrice)) {
-        displayErrorMessage("regularPrice-error", "Regular price must be in number");
-        isValid = false;
+    // Validate brand name
+    const brandName = document.getElementById('brandnameX').value.trim();
+    if (!brandName) {
+      document.getElementById('brandName-error').textContent = 'Brand Name is required';
+      valid = false;
     }
 
-     if (isNaN(discount) ) {
-        displayErrorMessage("discount-error", "discount must be in numbers");
-        isValid = false;
-    }else if (discount <= 0 ) {
-        displayErrorMessage("discount-error", "discount must be a valid positive number");
-        isValid = false;
-    }else if(discount >=100){
-        displayErrorMessage("discount-error", "discount must be lessthan 100 ");
-        isValid = false;
+    // Validate description
+    const description = document.getElementById('descriptionX').value.trim();
+    if (!description) {
+      document.getElementById('description-error').textContent = 'Description is required';
+      valid = false;
     }
 
-    if (stock <= 0) {
-    displayErrorMessage("stock-error", "Stock must be a valid positive number");
-    isValid = false;
-    } else if (isNaN(stock)) {
-    displayErrorMessage("stock-error", "Stock must be in numbers");
-    isValid = false;
-}
+    // Validate regular price
+    const regularPrice = document.getElementById('regularPriceX').value.trim();
+    if (!regularPrice || isNaN(regularPrice)) {
+      document.getElementById('regularPrice-error').textContent = 'Valid Regular Price is required';
+      valid = false;
+    }
 
-    return isValid;
-}
+    // Validate discount
+    const discount = document.getElementById('discountX').value.trim();
+    if (!discount || isNaN(discount)) {
+      document.getElementById('discount-error').textContent = 'Valid Discount is required';
+      valid = false;
+    }
 
+    // Validate stock
+    const stock = document.getElementById('stockQuantity').value.trim();
+    if (!stock || isNaN(stock)) {
+      document.getElementById('stock-error').textContent = 'Valid Stock is required';
+      valid = false;
+    }
 
-function displayErrorMessage(elementId, message) {
-  var errorElement = document.getElementById(elementId);
-  errorElement.innerText = message;
-  errorElement.style.display = "block";
-  errorElement.style.color = "red";
-}
-    
-function resetErrorMessages() {
- var errorElements = document.querySelectorAll(".error-message");
- errorElements.forEach(function (element) {
- element.innerText = "";
- element.style.display = "none";
- });
-}
+    // Validate category
+    const category = document.getElementById('categoryX').value.trim();
+    if (!category) {
+      document.getElementById('categoryX').textContent = 'Category is required';
+      valid = false;
+    }
+    alert(valid)
+    if (valid) {
+      form.submit();
+      
 
+    }
+  });
 </script>
-</body>
-
-
-<!-- Mirrored from wp.alithemes.com/html/ShoeShack/ShoeShack-backend/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:32:57 GMT -->
-</html>
