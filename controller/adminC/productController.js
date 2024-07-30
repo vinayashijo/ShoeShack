@@ -204,7 +204,7 @@ const loadeditProductPage = async(req,res)=>{
 
 //product update function------------------------------------------------------------------
 
-const productupdate = async (req, res) => {
+const productupdate = async (req, res,next) => {
     try {
         // console.log("req now in productUpdate ");
         const id = req.params.id;

@@ -78,7 +78,9 @@
                             <div class="col-sm-6 mb-3">
                                 <label class="form-label">Category</label>
                                 <!-- <label class="form-label">Selected Category: <%= data[0].category %></label> -->
-                                <select class="form-select border" style="width: 150px;" name="category">
+                                <select class="form-select border" style="width: 150px;" name="category" id="categoryX"  required>
+                                    <option value="" >- Select Category -</option>
+
                                     <% for (let i = 0; i < cat.length; i++) {
                                         let catId = cat[i]._id.toString().trim();
                                         let dataCategory = data[0].category.toString().trim();
@@ -89,6 +91,8 @@
                                         </option>
                                     <% } %>
                                 </select>
+                                <div id="category-error" class="error-message"></div>
+                                
                             </div>
                           </div>
                       </div>
@@ -162,6 +166,7 @@ function validateForm() {
     let isValid = true;
     const productname = document.getElementById("productnameX").value.trim();
     const description = document.getElementById("descriptionX").value.trim();
+    const category = document.getElementById("categoryX").value.trim();
     const brand = document.getElementById("brandnameX").value.trim();
     const oldPrice = parseFloat(document.getElementById("oldPriceX").value);
     const discount = parseFloat(document.getElementById("discountX").value);
@@ -171,7 +176,10 @@ function validateForm() {
         displayErrorMessage("productName-error", "Product Name is required");
         isValid = false;
     }
-
+    if (category === "" ) {
+        displayErrorMessage("category-error", "Category is required");
+        isValid = false;
+    }
     if (description === "") {
         displayErrorMessage("description-error", "Description is required");
         isValid = false;

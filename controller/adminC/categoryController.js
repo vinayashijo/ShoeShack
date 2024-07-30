@@ -55,27 +55,27 @@ const loadaddToCategory = async(req,res)=>{
            const id = await categoryModel.create(categoryadded)
            console.log("Category added successfully", id)
 
-           if (offer && offer > 0 )
-           {
-                const offerCatproducts = await ProductModel.find({category : id})
-                const regularPrice = offerCatproducts.regularPrice
-                const oldPrice = offerCatproducts.oldPrice
-                const discount = offerCatproducts.discount
+          //  if (offer && offer > 0 )
+          //  {
+          //       const offerCatproducts = await ProductModel.find({category : id})
+          //       const regularPrice = offerCatproducts.regularPrice
+          //       const oldPrice = offerCatproducts.oldPrice
+          //       const discount = offerCatproducts.discount
 
-                if(offerCatproducts)
-                {
-                  offerCatproducts.array.forEach(element => 
-                    {
-                    const cDiscount  =  offer
-                    const pDiscount  =  element.discount
-                    if(cDiscount > pDiscount )
-                    {
-                          oldPrice =   oldPrice - (cDiscount * .01)
-                    }
+                // if(offerCatproducts)
+                // {
+                //   offerCatproducts.array.forEach(element => 
+                //     {
+                //     const cDiscount  =  offer
+                //     const pDiscount  =  element.discount
+                //     if(cDiscount > pDiscount )
+                //     {
+                //           oldPrice =   oldPrice - (cDiscount * .01)
+                //     }
 
-                  });
-                }
-           }
+                //   });
+                // }
+          //  }
             res.redirect("/categorylist");
           
        }else{
