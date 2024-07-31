@@ -163,7 +163,7 @@ const addproducts = async (req, res, next) => {
         oldPrice: product.oldPrice,
         discount: product.discount,
         createdOn: Date.now(),
-        // productImage: images,
+        // productImage: images,  
         productImage: imagesforSubmit,
         stock: product.stock,
       };
