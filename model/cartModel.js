@@ -21,6 +21,14 @@ const cartSchema = mongoose.Schema({
         type: Number,
         default: 0,
       },  
+      discount:{
+        type: Number,
+        default: 0,
+      },  
+      isCatOffer:{
+        type: Boolean,
+        default: false,
+      },  
       cartDate:{
         type:Date,
         default: Date.now,
@@ -35,6 +43,7 @@ const cartSchema = mongoose.Schema({
     type : mongoose.Schema.Types.ObjectId,
     required : false
 } ,
+
   createdOn: {
     type: Date,
     default: Date.now,

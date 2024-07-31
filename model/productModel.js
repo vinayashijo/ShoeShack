@@ -51,7 +51,7 @@ const productSchema = mongoose.Schema({
     required:true,  
  
   },
-  isCatgegoryOfferApplied: {
+  isCatOfferApplied: {
     type: Boolean,
     default: false,
   },

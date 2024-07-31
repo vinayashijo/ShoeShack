@@ -64,13 +64,41 @@ const addToCart = async (req, res,next) => {
     try {
             const { productId} = req.body;
                        
-            const productDetails = await productModel.findOne({ _id: productId });
+            const productDetails = await productModel.findOne({ _id: productId })
+            .populate("category");
+            
             const stockQuantity = productDetails.stock;
             const regularPrice = productDetails.regularPrice;
             const oldPrice = productDetails.oldPrice;
-            const discount = productDetails.discount;
-            const discountPrice = oldPrice - (oldPrice * (discount / 100));
-            // const discountPrice1 = regularPrice ;
+            let discount = productDetails?.discount;
+            let catOffer =productDetails.category?.offer;
+            
+            console.log(catOffer)
+            if(!discount)
+            {
+                discount = 0
+            }
+            let discountApplied = discount;
+            if(!catOffer)
+            {
+                catOffer = 0
+            }
+            console.log(catOffer)
+            console.log(discount)
+            isCategoryOfferApplied = false
+
+            if (catOffer > discount)
+            {
+                 discountApplied = catOffer
+                isCategoryOfferApplied = true
+            }
+            
+            console.log("oldPrice" ,oldPrice)
+
+            
+            const discountPrice = oldPrice - (oldPrice * (discountApplied / 100));
+            console.log("discountApplied",discountApplied)
+            console.log("discountPrice -price in cart " ,discountPrice)
 
             let cart = await cartModel.findOne({ userId: req.session.user._id });
             if (!cart) {
@@ -84,10 +112,16 @@ const addToCart = async (req, res,next) => {
                     // vv Updating existing item if index > -1 , there can be product in index 0
                     const existingItemCart = cart.items[cartItemIndex];
                     const availableQuantity = Math.min(stockQuantity, 5) - existingItemCart.quantity;
+
                     if (availableQuantity > 0) {
+                       
                         const incrementQuantity = Math.min(availableQuantity, 1);
                         existingItemCart.quantity += incrementQuantity;
                         existingItemCart.price = discountPrice;
+
+                        //new fields added for category offer 31/7/24
+                        existingItemCart.discount = discountApplied;
+                        existingItemCart.isCatOffer =isCategoryOfferApplied
                     } 
                     else {
                         // console.log("reached the maximum quantity of products available for purchase")
@@ -99,22 +133,25 @@ const addToCart = async (req, res,next) => {
                     }
                 } 
                 else {
-                     
-                    cart.items.push({ productId: productId, price: discountPrice, quantity: 1 });
+                    cart.items.push({ productId: productId, price: discountPrice,  discount : discountApplied,isCatOffer: isCategoryOfferApplied,quantity: 1 });
+                    // cart.items.push({ productId: productId, price: discountPrice, quantity: 1 });
                 }
 
+              console.log("cart",cart)
                const totalPriceCalculated= cartHelper.calculateTotalPricefromItems(cart.items) ?? discountPrice;
                if(totalPriceCalculated == 0 )
                 {
                   totalPriceCalculated = discountPrice
                 }
                 cart.totalPrice  = totalPriceCalculated
+
+                console.log("totalPrice",cart.totalPrice)
+
+
                 await cart.save();
 
-                // console.log(cart.items.length)
-
                 req.session.productCount  = cart.items.length
-                // console.log("cart.save(),saved sucess")
+                console.log("cart.save(),saved sucess")
 
                 return res.status(200).json({ success: true,message :"Added to cart successfully", login: true, outOfStock:false, newItem: true, totalPrice: cart.totalPrice });
             } 
@@ -152,16 +189,22 @@ const viewcart = async (req, res,next) => {
                             name: item.productId.productName,
                             stock: item.productId.stock,
                             description: item.productId.description
+                           
                         },
                     price: item.price,
-                    quantity: item.quantity,
+                    isCatOffer: item.isCatOffer,
+                    discount: item.discount,
+                    quantity: item.quantity
+                    
                     
                 })),
                 coupon : cartData.coupon,
                 totalPrice: cartData.totalPrice
             } : { items: [], coupon : null,totalPrice: 0 }; // coupon: cartData.coupon,
 
+         
               if( cart && cart.items.length > 0 ){
+                console.log(cart.items)
                 req.session.productCount = cart.items.length
                 
                 }

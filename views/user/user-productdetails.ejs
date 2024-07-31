@@ -233,9 +233,14 @@ async function addToCart(productId) {
                                             <br><span class="old-price-big-font">₹<%= data.oldPrice %></span><br>
                                         </div>
                                     </div>
-                                    <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                                    <div class="bt-1 border-color-1 mt-15 mb-15">
+                                    </div>
+                                    
                                     <div class="short-desc mb-30">
                                         <p><%= data.description %></p>
+                                        <br>
+                                        <span> Category: <a><%= data.category.name   %> (<%= data.category.offer ?? 0   %> % Off )</a><br></span>
+
                                     </div>
                                     <div class="product_sort_info font-xs mb-30">
                                         <ul>

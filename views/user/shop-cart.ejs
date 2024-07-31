@@ -366,13 +366,13 @@ function showProductDetails(productId) {
                         <table class="table shopping-summery text-center clean">
                             <thead>
                                 <tr class="main-heading">
-                                    <th scope="col">Image</th>
-                                    <th scope="col">Product</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col">Stock</th>
-                                    <th scope="col">Quantity</th>
-                                    <th scope="col">Subtotal</th>
-                                    <th scope="col">Remove</th>
+                                    <th scope="col-2"></th>
+                                    <th scope="col-4">Product</th>
+                                    <th scope="col-1">Price</th>
+                                    <th scope="col-2">Offer Applied</th>
+                                    <th scope="col-1">Quantity</th>
+                                    <th scope="col-1">Subtotal</th>
+                                    <th scope="col-1">Remove</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -388,9 +388,20 @@ function showProductDetails(productId) {
                                             <p class="font-xs"><%= cart.items[i].productId.description %></p>
                                         </td>
                                         <td class="price" data-title="Price"><span>₹<%= cart.items[i].price.toFixed(2) %></span></td>
-                                        <td class="stock" data-title="Stock"><span><%= cart.items[i].productId.stock %></span></td>
+                                       
+                                        <td class="price" data-title="catOffer">
+                                           
+                                            <% if (cart.items[i].isCatOffer )  { %>
+                                            <span>CAT (<%= cart.items[i].discount ?? 0  %> % saved)   </span>
+                                            <% } else { %>
+                                                <span>₹ PRD (<%= cart.items[i].discount ?? 0 %> % saved)</span>
+                                             <% } %>
+
+                                        </td>
+
+                                        <!-- <td class="stock" data-title="Stock"><span><%= cart.items[i].productId.stock %></span></td> -->
                                         <td class="text-center" data-title="Stock">
-                                            <div class="detail-qty border radius m-auto">
+                                            <div class="detail-qty bor der radius m-auto">
                                                 <a href="#" class="qty-down" onclick="updateQuantity('<%= cart.items[i].productId._id %>', '<%= cart.items[i].productId.stock %>', -1, event)">
                                                     <i class="fi-rs-angle-small-down"></i></a>
                                                 <span class="qty-val"><%= cart.items[i].quantity %></span>
