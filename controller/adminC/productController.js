@@ -82,7 +82,7 @@ const loadaddProductPage = async (req, res) => {
       res.redirect("/adminlogin");
     }
   } catch (error) {
-    // console.log("error in add products "+error)
+     console.log("error in add products "+ error)
     next(error);
   }
 };

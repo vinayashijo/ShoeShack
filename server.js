@@ -36,6 +36,7 @@ app.use((req,res,next) =>{
   next();
 });
 
+// Flash messages middleware
 
 //setup view engine and static file serving
 app.set('view engine','ejs')
